@@ -17,6 +17,8 @@ import html
 import difflib
 import time
 import subprocess
+import shutil
+from concurrent.futures import ThreadPoolExecutor
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -125,7 +127,9 @@ REPORT_INTRO_PLAIN = "{day}일 주요 뉴스 전달드립니다."   # 별표(*) 
 REPORT_SECTIONS = {}
 
 # AI 요약 설정 (지시문은 clipping_prompt.txt 파일에서 읽음 → 이 파일만 고치면 요약 스타일이 바뀜)
-CLAUDE_MODEL = "claude-sonnet-5-5"
+CLAUDE_MODEL = "claude-sonnet-5-5"   # (API 키 방식일 때)
+CLAUDE_CODE_MODEL = "sonnet"         # (구독 토큰 방식일 때) sonnet = 품질·속도 균형 / haiku = 더 빠름
+SUMMARY_WORKERS = 5                  # 동시에 요약할 기사 수
 PROMPT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clipping_prompt.txt")
 # 별표(*) 없이 번호만 보냈을 때 '눈에 띄는 뉴스'로 올릴 개수 (0 = 별표 붙인 기사만 올림)
 DEFAULT_HIGHLIGHTS = 0
@@ -706,7 +710,7 @@ def load_prompt():
 
 
 def build_batch_prompt(targets, items):
-    parts = [load_prompt(), "", "아래 기사들을 위 규칙에 맞게 각각 정리해 주세요.",
+    parts = [load_prompt(), "", "아래 기사를 위 규칙에 맞게 정리해 주세요.",
              "도구를 사용하지 말고, 다른 말 없이 아래 JSON 형식으로만 답하세요.",
              '{"번호": {"headline": "○ 한 줄 요약", "summary": "☞요약 단락"}, ...}', ""]
     for no in targets:
@@ -715,27 +719,50 @@ def build_batch_prompt(targets, items):
     return "\n".join(parts)
 
 
-def subscription_summarize(targets, items):
-    """Claude 구독(Claude Code)으로 한 번에 요약. 결과 {번호: {...}} / 실패 시 {'_error': ...}"""
-    env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}  # 구독 토큰을 쓰도록
-    env["CLAUDE_CODE_OAUTH_TOKEN"] = CLAUDE_CODE_OAUTH_TOKEN
+def claude_cli():
+    path = shutil.which("claude")   # 워크플로가 미리 설치해 둔 Claude Code
+    return [path] if path else ["npx", "-y", "@anthropic-ai/claude-code"]
+
+
+def summarize_one(no, items, env):
+    """기사 1건 요약 → (번호, 결과 dict 또는 None, 오류)"""
     try:
         proc = subprocess.run(
-            ["npx", "-y", "@anthropic-ai/claude-code", "-p", "--output-format", "text"],
-            input=build_batch_prompt(targets, items), capture_output=True, text=True,
-            timeout=600, env=env,
+            claude_cli() + ["-p", "--output-format", "text", "--model", CLAUDE_CODE_MODEL, "--max-turns", "1"],
+            input=build_batch_prompt([no], items), capture_output=True, text=True, timeout=300, env=env,
         )
         out = proc.stdout.strip()
         if proc.returncode != 0 or not out:
             err = (proc.stderr or out or "응답 없음").strip().splitlines()
-            print(f"[구독 요약 실패] {proc.stderr[-500:]}", file=sys.stderr)
-            return {"_error": (err[-1] if err else "실패")[:100]}
+            print(f"[구독 요약 실패 {no}] {proc.stderr[-300:]}", file=sys.stderr)
+            return no, None, (err[-1] if err else "실패")[:100]
         m = re.search(r"\{.*\}", out, re.S)
         data = json.loads(m.group(0)) if m else {}
-        return {str(k).replace("번호", "").strip(): v for k, v in data.items() if isinstance(v, dict)}
+        if "summary" in data:
+            return no, data, ""
+        for k, v in data.items():
+            if isinstance(v, dict) and v.get("summary"):
+                return no, v, ""
+        return no, None, "형식 오류"
     except Exception as e:
-        print(f"[구독 요약 실패] {e}", file=sys.stderr)
-        return {"_error": str(e)[:100]}
+        print(f"[구독 요약 실패 {no}] {e}", file=sys.stderr)
+        return no, None, str(e)[:100]
+
+
+def subscription_summarize(targets, items):
+    """Claude 구독(Claude Code)으로 기사별 동시 요약. 결과 {번호: {...}}, 실패 시 '_error' 포함"""
+    env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}  # 구독 토큰을 쓰도록
+    env["CLAUDE_CODE_OAUTH_TOKEN"] = CLAUDE_CODE_OAUTH_TOKEN
+    result, errors = {}, []
+    with ThreadPoolExecutor(max_workers=SUMMARY_WORKERS) as pool:
+        for no, data, err in pool.map(lambda n: summarize_one(n, items, env), targets):
+            if data:
+                result[no] = data
+            else:
+                errors.append(err)
+    if errors:
+        result["_error"] = errors[0]
+    return result
 
 
 def ai_summarize(it):
@@ -1022,6 +1049,11 @@ def handle_updates(updates):
             headlines = text
         elif text:
             wants_help = True
+    if wants_news or selection or feedbacks or headlines or admin:
+        try:   # 받자마자 '입력 중…' 표시
+            telegram("sendChatAction", {"chat_id": TELEGRAM_CHAT_ID, "action": "typing"}, tries=1)
+        except Exception:
+            pass
     print(f"메시지 확인: 뉴스요청={wants_news} / 번호={selection} / ○줄={bool(headlines)} "
           f"/ 피드백={len(feedbacks)} / 기타={wants_help}")
 
