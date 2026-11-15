@@ -26,8 +26,8 @@ from email.utils import parsedate_to_datetime
 # GitHub 저장소 > Settings > Secrets and variables > Actions 에
 # 아래 4개 이름 그대로 등록하면 자동으로 읽어옵니다.
 # =====================================================================
-NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "").strip()          # 네이버 Client ID
-NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "").strip()  # 네이버 Client Secret
+NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "").strip()          # NAVER API HUB Client ID
+NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "").strip()  # NAVER API HUB Client Secret
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()    # 텔레그램 봇 토큰
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()        # 받을 사람 chat ID
 
@@ -122,7 +122,8 @@ MEDIA_NAMES = {
 }
 
 KST = timezone(timedelta(hours=9))
-NAVER_URL = "https://openapi.naver.com/v1/search/news.json"
+# NAVER API HUB (네이버 클라우드 플랫폼) 뉴스 검색 주소
+NAVER_URL = "https://naverapihub.apigw.ntruss.com/search/v1/news"
 MAX_PAGES = 5  # 검색어당 최대 500건까지 확인
 DAYS = "월화수목금토일"
 
@@ -155,20 +156,23 @@ class NaverError(Exception):
 
 
 def naver_search(query, start=1):
-    params = urllib.parse.urlencode({"query": query, "display": 100, "start": start, "sort": "date"})
+    params = urllib.parse.urlencode({"query": query, "display": 100, "start": start, "sort": "date", "format": "json"})
     req = urllib.request.Request(f"{NAVER_URL}?{params}")
-    req.add_header("X-Naver-Client-Id", NAVER_CLIENT_ID)
-    req.add_header("X-Naver-Client-Secret", NAVER_CLIENT_SECRET)
+    req.add_header("X-NCP-APIGW-API-KEY-ID", NAVER_CLIENT_ID)
+    req.add_header("X-NCP-APIGW-API-KEY", NAVER_CLIENT_SECRET)
     try:
         with urllib.request.urlopen(req, timeout=15) as res:
             return json.loads(res.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
-        detail = ""
+        raw = e.read().decode("utf-8", errors="ignore")
+        detail = raw
         try:
-            body = json.loads(e.read().decode("utf-8"))
-            detail = f"{body.get('errorCode', '')} {body.get('errorMessage', '')}".strip()
+            body = json.loads(raw)
+            err = body.get("error", body) if isinstance(body, dict) else {}
+            detail = " ".join(str(err.get(k, "")) for k in ("errorCode", "message", "errorMessage")).strip() or raw
         except Exception:
             pass
+        detail = re.sub(r"\s+", " ", detail)[:150]
         raise NaverError(f"HTTP {e.code} {detail}".strip())
 
 
@@ -296,9 +300,9 @@ def fmt(dt):
 
 def error_hint(err):
     if "401" in err:
-        return "네이버 Client ID / Client Secret 값을 확인해 주세요 (GitHub Secrets)."
+        return "네이버 클라우드 NAVER API HUB의 Client ID / Client Secret 값을 GitHub Secrets에 넣었는지 확인해 주세요."
     if "403" in err:
-        return "네이버 개발자센터 > 내 애플리케이션 > API 설정에서 사용 API에 '검색'을 추가해 주세요."
+        return "NAVER API HUB > Application에서 '검색' API가 선택되어 있는지 확인해 주세요."
     if "429" in err:
         return "네이버 API 하루 호출 한도를 넘었어요. 내일 다시 시도돼요."
     return "잠시 후 다시 시도해 주세요."
