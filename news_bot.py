@@ -482,14 +482,25 @@ def split_message(text, limit=3800):
 # ---------------------------------------------------------------------
 # 텔레그램
 # ---------------------------------------------------------------------
-def telegram(method, params):
+def telegram(method, params, tries=5):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/{method}"
     data = urllib.parse.urlencode(params).encode()
-    try:
-        with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=30) as res:
-            body = json.loads(res.read().decode())
-    except urllib.error.HTTPError as e:
-        raise RuntimeError(f"텔레그램 오류 HTTP {e.code}: {e.read().decode(errors='ignore')}")
+    for attempt in range(tries):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=30) as res:
+                body = json.loads(res.read().decode())
+            break
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 500, 502, 503, 504) and attempt < tries - 1:
+                time.sleep(3 * (attempt + 1))
+                continue
+            raise RuntimeError(f"텔레그램 오류 HTTP {e.code}: {e.read().decode(errors='ignore')}")
+        except (urllib.error.URLError, ConnectionError, TimeoutError, OSError) as e:
+            # 일시적인 네트워크 끊김 → 잠시 쉬었다 다시 시도
+            print(f"[텔레그램 재시도 {attempt + 1}/{tries}] {e}", file=sys.stderr)
+            if attempt == tries - 1:
+                raise
+            time.sleep(3 * (attempt + 1))
     if not body.get("ok"):
         raise RuntimeError(f"텔레그램 오류: {body}")
     return body.get("result")
@@ -807,8 +818,8 @@ def run_daily(dry_run=False):
     since, until = daily_window(now)
     results, failed, err, total = gather(since, until)
     msg = build_message("📰 데일리 뉴스 클리핑", since, fmt(until), results, failed, err, total)
-    send_telegram(msg, dry_run)
     save_last_news(results)
+    send_telegram(msg, dry_run)
     print("정기 발송 완료")
 
 
@@ -817,8 +828,8 @@ def run_command(dry_run=False):
     since, until = command_window(now)
     results, failed, err, total = gather(since, until)
     msg = build_message("🔎 요청하신 뉴스", since, f"현재({fmt(until)})", results, failed, err, total)
-    send_telegram(msg, dry_run)
     save_last_news(results)
+    send_telegram(msg, dry_run)
     print("요청 답장 완료")
 
 
