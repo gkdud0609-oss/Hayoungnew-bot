@@ -111,6 +111,10 @@ CUTOFF_HOUR = 17
 # 텔레그램에서 이 단어를 보내면 뉴스를 보내 줍니다
 COMMAND_WORDS = {"뉴스", "/news"}
 
+# 한 번 실행될 때 텔레그램을 계속 지켜보는 시간(분). 이 시간 동안 보낸 메시지는 몇 초 안에 처리
+# (5분마다 새 실행이 대기하므로 끝나면 바로 이어서 지켜봄)
+LISTEN_MINUTES = 25
+
 # ---- 보고용 정리 양식 (번호를 보내면 이 양식으로 정리) ----
 REPORT_TITLE = "[{month}월 {day}일 대동 Daily News]"
 REPORT_GREETING = "안녕하세요? 부회장님."
@@ -126,7 +130,12 @@ PROMPT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clipping
 # 별표(*) 없이 번호만 보냈을 때 '눈에 띄는 뉴스'로 올릴 개수 (0 = 별표 붙인 기사만 올림)
 DEFAULT_HIGHLIGHTS = 0
 # 마지막으로 보낸 뉴스 목록 저장 파일 (번호 → 기사 찾기용, GitHub이 자동 저장)
-LAST_NEWS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news.json")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LAST_NEWS_FILE = os.path.join(BASE_DIR, "last_news.json")
+# 마지막으로 보낸 보고용 정리본 (○ 줄 수정·피드백 반영 후 다시 보내기용)
+LAST_REPORT_FILE = os.path.join(BASE_DIR, "last_report.json")
+# 텔레그램으로 받은 요약 피드백 (다음 요약부터 바로 반영)
+FEEDBACK_FILE = os.path.join(BASE_DIR, "style_feedback.txt")
 
 # 제목에 검색어가 있는 기사만 남기기 (True 권장: 'AI', '로봇'처럼 넓은 검색어의 잡음 제거)
 TITLE_MUST_CONTAIN_KEYWORD = True
@@ -485,14 +494,15 @@ def split_message(text, limit=3800):
 def telegram(method, params, tries=5):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/{method}"
     data = urllib.parse.urlencode(params).encode()
+    wait = int(params.get("timeout", 0) or 0) + 30   # 길게 기다리는 요청은 그만큼 여유
     for attempt in range(tries):
         try:
-            with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=30) as res:
+            with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=wait) as res:
                 body = json.loads(res.read().decode())
             break
         except urllib.error.HTTPError as e:
-            if e.code in (429, 500, 502, 503, 504) and attempt < tries - 1:
-                time.sleep(3 * (attempt + 1))
+            if e.code in (409, 429, 500, 502, 503, 504) and attempt < tries - 1:
+                time.sleep(3 * (attempt + 1))   # 409 = 다른 실행이 아직 지켜보는 중 → 잠시 후 재시도
                 continue
             raise RuntimeError(f"텔레그램 오류 HTTP {e.code}: {e.read().decode(errors='ignore')}")
         except (urllib.error.URLError, ConnectionError, TimeoutError, OSError) as e:
@@ -520,6 +530,38 @@ def send_telegram(text, dry_run=False, plain=False):
 # ---------------------------------------------------------------------
 # 번호 목록 저장 / 보고용 정리
 # ---------------------------------------------------------------------
+IN_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
+
+
+def git(*args):
+    r = subprocess.run(["git", *args], capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"[git {' '.join(args[:2])}] {r.stderr.strip()[:200]}", file=sys.stderr)
+    return r.returncode == 0
+
+
+def push_files(*paths, message="봇 데이터 저장"):
+    """저장한 파일을 바로 저장소에 올림 → 다른 실행(정기 발송/답장)과 내용을 맞춤"""
+    if not IN_GITHUB:
+        return
+    git("config", "user.name", "news-bot")
+    git("config", "user.email", "news-bot@users.noreply.github.com")
+    git("add", *[os.path.basename(p) for p in paths])
+    if git("commit", "-q", "-m", message):
+        git("pull", "--rebase", "-X", "theirs", "-q")
+        git("push", "-q")
+
+
+def push_last_news():
+    push_files(LAST_NEWS_FILE, message="최근 뉴스 목록 저장")
+
+
+def pull_last_news():
+    """다른 실행이 저장한 최신 목록 가져오기"""
+    if IN_GITHUB:
+        git("pull", "--rebase", "-X", "theirs", "-q")
+
+
 def save_last_news(results):
     items = {}
     for i, (cat, arts) in enumerate(results, 1):
@@ -530,6 +572,7 @@ def save_last_news(results):
             }
     with open(LAST_NEWS_FILE, "w", encoding="utf-8") as f:
         json.dump({"saved": datetime.now(KST).isoformat(), "items": items}, f, ensure_ascii=False, indent=1)
+    push_last_news()
 
 
 SELECTION_RE = re.compile(r"^\s*\d+\s*-\s*\d+\s*\*?(\s*[,，/·\s]\s*\d+\s*-\s*\d+\s*\*?)*\s*$")
@@ -635,12 +678,31 @@ def fetch_article_text(it, limit=6000):
     return it.get("desc") or ""
 
 
+def load_feedback():
+    try:
+        with open(FEEDBACK_FILE, encoding="utf-8") as f:
+            return [l.strip() for l in f if l.strip()]
+    except OSError:
+        return []
+
+
+def save_feedback(lines):
+    with open(FEEDBACK_FILE, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + ("\n" if lines else ""))
+    push_files(FEEDBACK_FILE, message="요약 피드백 저장")
+
+
 def load_prompt():
     try:
         with open(PROMPT_FILE, encoding="utf-8") as f:
-            return f.read().strip()
+            prompt = f.read().strip()
     except OSError:
-        return "기사를 ☞로 시작하는 한 단락 클리핑으로 압축 요약하고, ○로 시작하는 한 줄 요약도 작성하세요."
+        prompt = "기사를 ☞로 시작하는 한 단락 클리핑으로 압축 요약하고, ○로 시작하는 한 줄 요약도 작성하세요."
+    fb = load_feedback()
+    if fb:
+        prompt += ("\n\n[추가 요청사항 — 담당자가 텔레그램으로 준 피드백. 위 규칙과 겹치면 이것을 우선 적용]\n"
+                   + "\n".join(f"- {l}" for l in fb))
+    return prompt
 
 
 def build_batch_prompt(targets, items):
@@ -720,7 +782,7 @@ def ai_summarize(it):
     return None
 
 
-def build_report(picks, items, now):
+def build_report(picks, items, now, headlines=None):
     found = [(no, star, items[no]) for no, star in picks if no in items]
     missing = [no for no, _ in picks if no not in items]
     if not found:
@@ -734,15 +796,20 @@ def build_report(picks, items, now):
     def block(it):
         return [f"☞{summary_line(it)}", "", f"원문: {it['title']}", article_link(it), ""]
 
-    intro = REPORT_INTRO if highlights else REPORT_INTRO_PLAIN
+    intro = REPORT_INTRO if (highlights or headlines) else REPORT_INTRO_PLAIN
     lines = [
         REPORT_TITLE.format(month=now.month, day=now.day), "",
         REPORT_GREETING,
         intro.format(month=now.month, day=now.day), "",
     ]
-    if highlights:
+    if headlines:   # 담당자가 직접 적어 준 ○ 줄
+        lines += [f"○ {h.lstrip('○').strip()}" for h in headlines]
+        lines += [""]
+    elif highlights:
         lines += [f"○ {headline_line(it)}" for _, _, it in highlights]
-        lines += ["", "★ 눈에 띄는 뉴스 ★", ""]
+        lines += [""]
+    if highlights:
+        lines += ["★ 눈에 띄는 뉴스 ★", ""]
         for _, _, it in highlights:
             lines += block(it)
 
@@ -762,7 +829,64 @@ def build_report(picks, items, now):
     return "\n".join(lines).strip(), missing
 
 
+def summarize_items(targets, items, notes):
+    """고른 기사들에 AI 요약을 붙임 (실패한 건 네이버 요약문 사용)"""
+    if not targets:
+        return
+    if CLAUDE_CODE_OAUTH_TOKEN:
+        send_telegram(f"✏️ {len(targets)}건을 정리하고 있어요. 잠시만 기다려 주세요…")
+        res = subscription_summarize(targets, items)
+        errors = []
+        for no in targets:
+            r = res.get(no) or {}
+            if r.get("summary"):
+                items[no]["ai_summary"], items[no]["ai_headline"] = r["summary"], r.get("headline", "")
+            else:
+                errors.append(no)
+        if errors:
+            why = f" (원인: {res['_error']})" if res.get("_error") else ""
+            notes.append("⚠️ AI 요약에 실패해 네이버 요약문으로 대신한 기사: " + ", ".join(errors) + why)
+    elif ANTHROPIC_API_KEY:
+        send_telegram(f"✏️ {len(targets)}건을 정리하고 있어요. 잠시만 기다려 주세요…")
+        errors = []
+        for no in targets:
+            r = ai_summarize(items[no])
+            if r and r.get("summary"):
+                items[no]["ai_summary"], items[no]["ai_headline"] = r["summary"], r["headline"]
+            else:
+                errors.append(f"{no}({(r or {}).get('error', '실패')})")
+        if errors:
+            notes.append("⚠️ AI 요약에 실패해 네이버 요약문으로 대신한 기사: " + ", ".join(errors))
+    else:
+        notes.append("ℹ️ CLAUDE_CODE_OAUTH_TOKEN(구독 토큰)이 없어 네이버 요약문으로 정리했어요.")
+
+
+def save_last_report(picks, items, headlines=None):
+    used = {no: items[no] for no, _ in picks if no in items}
+    with open(LAST_REPORT_FILE, "w", encoding="utf-8") as f:
+        json.dump({"picks": picks, "items": used, "headlines": headlines or []},
+                  f, ensure_ascii=False, indent=1)
+    push_files(LAST_REPORT_FILE, message="최근 정리본 저장")
+
+
+def load_last_report():
+    pull_last_news()
+    try:
+        with open(LAST_REPORT_FILE, encoding="utf-8") as f:
+            d = json.load(f)
+        return [tuple(p) for p in d["picks"]], d["items"], d.get("headlines") or []
+    except (OSError, ValueError, KeyError):
+        return None
+
+
+def send_report(report, notes):
+    send_telegram(report, plain=True)  # 복사해서 바로 쓸 수 있게 서식 없이 보냄
+    if notes:
+        send_telegram(html.escape("\n".join(notes), quote=False))
+
+
 def run_selection(text):
+    pull_last_news()
     if not os.path.exists(LAST_NEWS_FILE):
         send_telegram("아직 저장된 뉴스 목록이 없어요. 먼저 '뉴스'라고 보내서 목록을 받아 주세요.")
         return
@@ -770,44 +894,79 @@ def run_selection(text):
         data = json.load(f)
     items = data.get("items", {})
     picks = parse_selection(text)
-    targets = [no for no, _ in picks if no in items]
     notes = []
-    if targets:
-        if CLAUDE_CODE_OAUTH_TOKEN:
-            send_telegram(f"✏️ {len(targets)}건을 정리하고 있어요. 잠시만 기다려 주세요…")
-            res = subscription_summarize(targets, items)
-            errors = []
-            for no in targets:
-                r = res.get(no) or {}
-                if r.get("summary"):
-                    items[no]["ai_summary"], items[no]["ai_headline"] = r["summary"], r.get("headline", "")
-                else:
-                    errors.append(no)
-            if errors:
-                why = f" (원인: {res['_error']})" if res.get("_error") else ""
-                notes.append("⚠️ AI 요약에 실패해 네이버 요약문으로 대신한 기사: " + ", ".join(errors) + why)
-        elif ANTHROPIC_API_KEY:
-            send_telegram(f"✏️ {len(targets)}건을 정리하고 있어요. 잠시만 기다려 주세요…")
-            errors = []
-            for no in targets:
-                r = ai_summarize(items[no])
-                if r and r.get("summary"):
-                    items[no]["ai_summary"], items[no]["ai_headline"] = r["summary"], r["headline"]
-                else:
-                    errors.append(f"{no}({(r or {}).get('error', '실패')})")
-            if errors:
-                notes.append("⚠️ AI 요약에 실패해 네이버 요약문으로 대신한 기사: " + ", ".join(errors))
-        else:
-            notes.append("ℹ️ CLAUDE_CODE_OAUTH_TOKEN(구독 토큰)이 없어 네이버 요약문으로 정리했어요.")
+    summarize_items([no for no, _ in picks if no in items], items, notes)
     report, missing = build_report(picks, items, datetime.now(KST))
     if report is None:
         send_telegram(f"목록에 없는 번호예요: {html.escape(', '.join(missing))}\n가장 최근에 받은 뉴스 목록의 번호로 보내 주세요.")
         return
-    send_telegram(report, plain=True)  # 복사해서 바로 쓸 수 있게 서식 없이 보냄
     if missing:
         notes.append(f"⚠️ 목록에 없어서 뺀 번호: {', '.join(missing)}")
-    if notes:
-        send_telegram(html.escape("\n".join(notes)))
+    notes.append("💬 ○ 줄을 바꾸려면 '- 내용'처럼 줄마다 -로 시작해서 보내 주세요. 요약 스타일은 '피드백: …'으로 알려 주세요.")
+    save_last_report(picks, items)
+    send_report(report, notes)
+
+
+def run_headlines(text):
+    """담당자가 보낸 ○ 줄로 바꿔서 마지막 정리본 다시 보내기"""
+    last = load_last_report()
+    if not last:
+        send_telegram("바꿀 정리본이 없어요. 먼저 번호를 보내서 정리본을 받아 주세요.")
+        return
+    picks, items, _ = last
+    heads = headline_lines(text)
+    report, _ = build_report(picks, items, datetime.now(KST), headlines=heads)
+    save_last_report(picks, items, heads)
+    send_report(report, [])
+
+
+def run_feedback(texts):
+    """'피드백: …' 저장 → 마지막 정리본을 새 기준으로 다시 요약해서 보내기"""
+    pull_last_news()
+    fb = load_feedback()
+    added = []
+    for t in texts:
+        body = re.sub(r"^피드백\s*[:：]?\s*", "", t).strip()
+        if body:
+            fb.append(body)
+            added.append(body)
+    save_feedback(fb)
+    send_telegram("✅ 피드백을 저장했어요. 앞으로 요약에 계속 반영돼요.\n"
+                  + "\n".join(f"• {html.escape(a)}" for a in added))
+    last = load_last_report()
+    if not last:
+        return
+    picks, items, heads = last
+    notes = ["🔁 피드백을 반영해 마지막 정리본을 다시 썼어요."]
+    summarize_items(list(items), items, notes)
+    report, _ = build_report(picks, items, datetime.now(KST), headlines=heads or None)
+    save_last_report(picks, items, heads)
+    send_report(report, notes)
+
+
+def run_feedback_admin(text):
+    """'피드백 목록' / '피드백 삭제 2' / '피드백 초기화'"""
+    pull_last_news()
+    fb = load_feedback()
+    m = re.match(r"피드백\s*삭제\s*(\d+)", text)
+    if m:
+        i = int(m.group(1)) - 1
+        if 0 <= i < len(fb):
+            removed = fb.pop(i)
+            save_feedback(fb)
+            send_telegram(f"🗑 삭제했어요: {html.escape(removed)}")
+        else:
+            send_telegram("그 번호의 피드백이 없어요. '피드백 목록'으로 번호를 확인해 주세요.")
+        return
+    if "초기화" in text:
+        save_feedback([])
+        send_telegram("🗑 저장된 피드백을 모두 지웠어요.")
+        return
+    if not fb:
+        send_telegram("저장된 피드백이 없어요. '피드백: 첫 덩어리는 더 짧게'처럼 보내 주세요.")
+    else:
+        send_telegram("📋 저장된 피드백\n" + "\n".join(f"{i}. {html.escape(l)}" for i, l in enumerate(fb, 1))
+                      + "\n\n지우려면 '피드백 삭제 번호'를 보내 주세요.")
 
 
 # ---------------------------------------------------------------------
@@ -833,42 +992,93 @@ def run_command(dry_run=False):
     print("요청 답장 완료")
 
 
-def run_poll():
-    """텔레그램에 쌓인 메시지 확인 → 내 채팅에서 '뉴스'가 왔으면 답장"""
-    updates = telegram("getUpdates", {"timeout": 0, "allowed_updates": '["message"]'})
-    if not updates:
-        print("새 메시지 없음")
-        return
+# ○ 줄로 인식할 줄머리: ○, -, •, ·, 'ㅇ ' (휴대폰에서 치기 쉬운 기호)
+HEADLINE_RE = re.compile(r"^\s*(?:○|-|•|·|ㅇ\s)\s*(\S.*)$")
 
-    # 확인한 메시지는 바로 '읽음' 처리 → 다음 확인 때 중복 답장 방지
-    last_id = max(u["update_id"] for u in updates)
-    telegram("getUpdates", {"offset": last_id + 1, "timeout": 0, "limit": 1})
 
+def headline_lines(text):
+    return [m.group(1).strip() for l in text.splitlines() if (m := HEADLINE_RE.match(l))]
+
+
+def handle_updates(updates):
     wants_news = wants_help = False
-    selection = None
+    selection = headlines = admin = None
+    feedbacks = []
     for u in updates:
         msg = u.get("message") or {}
         if str(msg.get("chat", {}).get("id")) != TELEGRAM_CHAT_ID:
             continue  # 등록된 내 채팅이 아니면 무시
         text = (msg.get("text") or "").strip()
+        as_numbers = re.sub(r"[‐‑‒–—―−－~]", "-", text)  # 휴대폰이 바꾼 다른 모양의 '-'도 번호로 인식
         if text in COMMAND_WORDS:
             wants_news = True
-        elif SELECTION_RE.match(text):
-            selection = text  # 여러 번 보냈으면 마지막 것
+        elif SELECTION_RE.match(as_numbers):
+            selection = as_numbers  # 여러 번 보냈으면 마지막 것
+        elif re.match(r"피드백\s*(목록|삭제|초기화)", text):
+            admin = text
+        elif text.startswith("피드백"):
+            feedbacks.append(text)
+        elif headline_lines(text):
+            headlines = text
         elif text:
             wants_help = True
+    print(f"메시지 확인: 뉴스요청={wants_news} / 번호={selection} / ○줄={bool(headlines)} "
+          f"/ 피드백={len(feedbacks)} / 기타={wants_help}")
 
+    if admin:
+        run_feedback_admin(admin)
     if selection:
         run_selection(selection)
+    if feedbacks:
+        run_feedback(feedbacks)
+    if headlines:
+        run_headlines(headlines)
     if wants_news:
         send_telegram("🔎 뉴스를 모으고 있어요. 잠시만 기다려 주세요…")
         run_command()
-    elif wants_help and not selection:
+    elif wants_help and not (selection or feedbacks or headlines or admin):
         send_telegram("• '뉴스' → 전날 오후 5시부터 지금까지의 기사 목록\n"
                       "• 번호(예: 1-1*, 4-2, 2-1) → 마지막 목록에서 골라 보고용 양식으로 정리\n"
-                      "   * 붙인 기사는 맨 위 '★ 눈에 띄는 뉴스'로 올라가요")
-    elif not selection:
-        print("처리할 메시지 없음")
+                      "   * 붙인 기사는 맨 위 '★ 눈에 띄는 뉴스'로 올라가요\n"
+                      "• - 로 시작하는 줄(○도 가능) → 마지막 정리본의 ○ 줄을 그 내용으로 바꿔서 다시 보내기\n"
+                      "• 피드백: 내용 → 요약 스타일에 계속 반영 + 마지막 정리본 다시 쓰기\n"
+                      "• 피드백 목록 / 피드백 삭제 2 / 피드백 초기화")
+
+
+def run_poll():
+    """LISTEN_MINUTES 동안 텔레그램을 지켜보다가 메시지가 오면 바로 처리"""
+    deadline = time.time() + LISTEN_MINUTES * 60
+    offset = None
+    print(f"{LISTEN_MINUTES}분 동안 텔레그램 메시지를 기다립니다")
+    while True:
+        remaining = int(deadline - time.time())
+        if remaining <= 5:
+            break
+        params = {"timeout": min(50, remaining), "allowed_updates": '["message"]'}
+        if offset:
+            params["offset"] = offset   # 이전 메시지는 처리 완료(읽음) 표시
+        try:
+            updates = telegram("getUpdates", params)
+        except Exception as e:
+            print(f"[확인 실패] {e}", file=sys.stderr)
+            time.sleep(10)
+            continue
+        if not updates:
+            continue
+        offset = max(u["update_id"] for u in updates) + 1
+        try:
+            handle_updates(updates)
+        except Exception as e:
+            # 처리 중 오류가 나도 멈추지 않고 알린 뒤 계속 지켜봄
+            print(f"[처리 실패] {e}", file=sys.stderr)
+            try:
+                send_telegram(html.escape(f"⚠️ 요청을 처리하다 오류가 났어요: {str(e)[:150]}\n"
+                                          "같은 내용을 한 번 더 보내 주세요."))
+            except Exception:
+                pass
+    if offset:
+        telegram("getUpdates", {"offset": offset, "timeout": 0, "limit": 1})
+    print("대기 종료")
 
 
 def main():
