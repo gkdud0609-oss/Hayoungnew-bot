@@ -122,6 +122,9 @@ REPORT_TITLE = "[{month}월 {day}일 대동 Daily News]"
 REPORT_GREETING = "안녕하세요? 부회장님."
 REPORT_INTRO = "{day}일 주요 뉴스 전달드리며 금일은 다음의 뉴스가 눈에 띕니다."
 REPORT_INTRO_PLAIN = "{day}일 주요 뉴스 전달드립니다."   # 별표(*) 기사가 없을 때
+# 보고서 날짜: 이 시각(시) 이후에 만든 정리본은 '다음 날' 날짜로 씀 (저녁에 정리 → 다음 날 아침 보고)
+#   12 = 낮 12시 이후면 다음 날 / 0 = 항상 다음 날 / 24 = 항상 당일
+REPORT_NEXT_DAY_FROM_HOUR = 12
 # 카테고리 → 보고서 섹션 이름을 다르게 쓰고 싶을 때만 적기 (비어 있으면 카테고리 이름 그대로)
 #   예) "경쟁사": "경쟁사 및 시장 동향", "시장 동향": "경쟁사 및 시장 동향"  → 두 섹션을 하나로 합침
 REPORT_SECTIONS = {}
@@ -199,7 +202,12 @@ MEDIA_NAMES = {
 KST = timezone(timedelta(hours=9))
 # NAVER API HUB (네이버 클라우드 플랫폼) 뉴스 검색 주소
 NAVER_URL = "https://naverapihub.apigw.ntruss.com/search/v1/news"
-MAX_PAGES = 5  # 검색어당 최대 500건까지 확인
+MAX_PAGES = 5         # 검색어당 최대 500건까지 확인 (평소)
+MAX_PAGES_RANGE = 10  # 날짜 지정 검색 때 (네이버 API는 검색어당 최신 약 1,000건까지만 제공)
+MAX_RANGE_DAYS = 31   # 날짜 지정 검색 최대 기간
+SEARCH_DAYS = 7       # '…찾아줘' 검색에서 날짜를 말하지 않으면 최근 며칠 기사에서 찾을지
+SEARCH_DEFAULT_COUNT = 5
+SEARCH_MAX_COUNT = 20
 DAYS = "월화수목금토일"
 
 
@@ -276,10 +284,10 @@ def clean(text):
     return html.unescape(text).strip()
 
 
-def collect(keyword, since, until):
+def collect(keyword, since, until, pages=None):
     """검색어 하나로 since ~ until 사이 기사 수집 (네이버는 최신순으로 줌)"""
     items = []
-    for page in range(MAX_PAGES):
+    for page in range(pages or MAX_PAGES):
         data = naver_search(keyword, start=1 + page * 100)
         batch = data.get("items", [])
         reached_old = False
@@ -380,7 +388,7 @@ def is_relevant(article):
     return False
 
 
-def gather(since, until):
+def gather(since, until, pages=None):
     """전체 카테고리 수집 → (결과, 실패 검색어, 첫 오류 내용, 전체 검색어 수)"""
     accepted, seen_urls, failed, results = [], set(), [], []
     first_error = ""
@@ -391,7 +399,7 @@ def gather(since, until):
         for kw in cat["keywords"]:
             total += 1
             try:
-                found = collect(kw, since, until)
+                found = collect(kw, since, until, pages)
                 matched = [a for a in found if title_matches(a["title"], kw, a["desc"])]
                 candidates += matched
                 print(f"{kw}: 기간 내 {len(found)}건 / 제목 일치 {len(matched)}건")
@@ -749,6 +757,36 @@ def summarize_one(no, items, env):
         return no, None, str(e)[:100]
 
 
+def claude_ask(prompt, timeout=180):
+    """Claude 구독으로 짧은 질문 → 답 텍스트 (실패 시 None)"""
+    if not CLAUDE_CODE_OAUTH_TOKEN:
+        return None
+    env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+    env["CLAUDE_CODE_OAUTH_TOKEN"] = CLAUDE_CODE_OAUTH_TOKEN
+    try:
+        proc = subprocess.run(
+            claude_cli() + ["-p", "--output-format", "text", "--model", CLAUDE_CODE_MODEL, "--max-turns", "1"],
+            input=prompt, capture_output=True, text=True, timeout=timeout, env=env,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            return proc.stdout.strip()
+        print(f"[Claude 실패] {proc.stderr[-300:]}", file=sys.stderr)
+    except Exception as e:
+        print(f"[Claude 실패] {e}", file=sys.stderr)
+    return None
+
+
+def claude_json(prompt, timeout=180):
+    text = claude_ask(prompt, timeout)
+    if not text:
+        return None
+    m = re.search(r"\{.*\}", text, re.S)
+    try:
+        return json.loads(m.group(0)) if m else None
+    except ValueError:
+        return None
+
+
 def subscription_summarize(targets, items):
     """Claude 구독(Claude Code)으로 기사별 동시 요약. 결과 {번호: {...}}, 실패 시 '_error' 포함"""
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}  # 구독 토큰을 쓰도록
@@ -809,6 +847,10 @@ def ai_summarize(it):
     return None
 
 
+def report_date(now):
+    return now + timedelta(days=1) if now.hour >= REPORT_NEXT_DAY_FROM_HOUR else now
+
+
 def build_report(picks, items, now, headlines=None):
     found = [(no, star, items[no]) for no, star in picks if no in items]
     missing = [no for no, _ in picks if no not in items]
@@ -824,10 +866,11 @@ def build_report(picks, items, now, headlines=None):
         return [f"☞{summary_line(it)}", "", f"원문: {it['title']}", article_link(it), ""]
 
     intro = REPORT_INTRO if (highlights or headlines) else REPORT_INTRO_PLAIN
+    rd = report_date(now)
     lines = [
-        REPORT_TITLE.format(month=now.month, day=now.day), "",
+        REPORT_TITLE.format(month=rd.month, day=rd.day), "",
         REPORT_GREETING,
-        intro.format(month=now.month, day=now.day), "",
+        intro.format(month=rd.month, day=rd.day), "",
     ]
     if headlines:   # 담당자가 직접 적어 준 ○ 줄
         lines += [f"○ {h.lstrip('○').strip()}" for h in headlines]
@@ -1009,6 +1052,146 @@ def run_daily(dry_run=False):
     print("정기 발송 완료")
 
 
+DATE_TOKEN_RE = re.compile(
+    r"(?:(\d{4}|\d{2})\s*[-./년]\s*)?(\d{1,2})\s*(?:[-/.]|월)\s*(\d{1,2})\s*일?"   # 11/10, 11월 10일, 2026-11-10, 26/11/10
+    r"|(?<![\d/.])(\d{1,2})\s*일"                                          # 12일 (앞 날짜와 같은 달)
+)
+
+
+def parse_date_range(text, now):
+    """'뉴스 11/10~11/12', '뉴스 11월 10일부터 12일까지', '뉴스 11/14' → (시작, 끝) / 없으면 None"""
+    dates, last_month, last_year = [], None, None
+    for m in DATE_TOKEN_RE.finditer(text):
+        try:
+            if m.group(2):
+                year = int(m.group(1)) if m.group(1) else None
+                if year is not None and year < 100:
+                    year += 2000   # 26 → 2026
+                month, day = int(m.group(2)), int(m.group(3))
+            elif last_month:
+                year, month, day = last_year, last_month, int(m.group(4))
+            else:
+                continue
+            y = year or now.year
+            d = datetime(y, month, day, tzinfo=KST)
+            if not year and d.date() > now.date():
+                d = d.replace(year=y - 1)   # 연도 없이 미래 날짜면 작년으로
+            dates.append(d)
+            last_month, last_year = month, d.year
+        except ValueError:
+            continue
+    if not dates:
+        return None
+    start, end = min(dates[:2]), max(dates[:2])
+    return start, min(end + timedelta(days=1), now)   # 끝 날짜는 그날 24:00까지 (미래는 현재까지)
+
+
+def run_range(text, dry_run=False):
+    now = datetime.now(KST)
+    rng = parse_date_range(text, now)
+    if not rng:
+        send_telegram("날짜를 못 알아들었어요. 예) 뉴스 11/10~11/12, 뉴스 11월 14일")
+        return
+    since, until = rng
+    if until <= since:
+        send_telegram("아직 오지 않은 날짜예요. 오늘이나 지난 날짜로 보내 주세요.")
+        return
+    if (until - since).days > MAX_RANGE_DAYS:
+        send_telegram(f"한 번에 최대 {MAX_RANGE_DAYS}일까지 찾을 수 있어요. 기간을 나눠서 보내 주세요.")
+        return
+    send_telegram(f"📅 {fmt(since)} ~ {fmt(until)} 뉴스를 찾고 있어요. 잠시만 기다려 주세요…")
+    results, failed, err, total = gather(since, until, pages=MAX_PAGES_RANGE)
+    msg = build_message("📅 기간 지정 뉴스", since, fmt(until), results, failed, err, total)
+    if (now - since).days >= 3:
+        msg += "\n\nℹ️ 'AI·로봇'처럼 기사가 많은 검색어는 네이버 API가 최근 약 1,000건까지만 줘서, 며칠 지난 기간은 일부 빠질 수 있어요."
+    save_last_news(results)
+    send_telegram(msg, dry_run)
+    print("기간 지정 답장 완료")
+
+
+SEARCH_TRIGGER_RE = re.compile(r"찾아|^검색")
+SEARCH_FILLER_RE = re.compile(
+    r"관련된|관련|에\s*대한|에\s*대해|에\s*관한|내용의|내용이|내용|뉴스들?|기사들?|"
+    r"찾아서|찾아줘|찾아\s*줘|찾아봐|찾아|알려줘|알려\s*줘|알려|보여줘|^검색|좀|"
+    r"몇\s*[개건]\s*만?|\d+\s*[개건]\s*만?|있는지|있나|있으면|해줘|부탁해?|요$"
+)
+
+
+def parse_search(text, now):
+    """→ (주제 문장, 개수, 시작, 끝)"""
+    m = re.search(r"(\d+)\s*[개건]", text)
+    n = min(int(m.group(1)), SEARCH_MAX_COUNT) if m else SEARCH_DEFAULT_COUNT
+    rng = parse_date_range(text, now) if DATE_TOKEN_RE.search(text) else None
+    since, until = rng if rng else (now - timedelta(days=SEARCH_DAYS), now)
+    topic = DATE_TOKEN_RE.sub(" ", text)
+    topic = re.sub(r"부터|까지|~", " ", topic)
+    topic = SEARCH_FILLER_RE.sub(" ", topic)
+    topic = re.sub(r"\s+", " ", topic).strip(" ,.?!")
+    return topic, n, since, until
+
+
+def run_search(text):
+    now = datetime.now(KST)
+    topic, n, since, until = parse_search(text, now)
+    if not topic:
+        send_telegram("무엇에 관한 뉴스를 찾을지 알려 주세요. 예) 휴머노이드 액추에이터 관련 뉴스 5개 찾아줘")
+        return
+    send_telegram(f"🔍 '{html.escape(topic)}' 뉴스를 찾고 있어요 ({fmt(since)} ~ {fmt(until)}, {n}건)…")
+
+    # 1) 검색어 만들기 (Claude가 있으면 요청 문장을 네이버 검색어로 바꿈)
+    queries = [topic]
+    q = claude_json(
+        "다음 요청에 맞는 기사를 네이버 뉴스에서 찾으려고 합니다. "
+        "검색에 쓸 짧은 검색어(2~4단어 명사구) 1~3개를 만들어 주세요. "
+        '도구를 쓰지 말고 다른 말 없이 JSON으로만 답하세요: {"queries": ["검색어1", "검색어2"]}\n\n'
+        f"요청: {text}", timeout=120)
+    if q and isinstance(q.get("queries"), list) and q["queries"]:
+        queries = [str(x).strip() for x in q["queries"][:3] if str(x).strip()] or queries
+
+    # 2) 기사 모으기 (중복 제거)
+    cands, seen = [], set()
+    for kw in queries:
+        try:
+            for a in collect(kw, since, until, pages=2):
+                if a["url"] in seen or is_duplicate(a, cands, set()):
+                    continue
+                seen.add(a["url"])
+                a["kw"] = kw
+                a["_norm"] = norm(a["title"])
+                a["_grams"] = bigrams(a["_norm"])
+                cands.append(a)
+        except Exception as e:
+            print(f"[검색 실패] {kw}: {e}", file=sys.stderr)
+    print(f"검색어 {queries} → 후보 {len(cands)}건")
+    if not cands:
+        send_telegram(f"'{html.escape(topic)}' 관련 기사를 찾지 못했어요. 다른 표현이나 더 긴 기간으로 다시 보내 주세요.")
+        return
+    cands.sort(key=lambda a: a["pub"], reverse=True)
+    cands = cands[:60]
+
+    # 3) 요청에 가장 맞는 기사 고르기
+    picked = cands[:n]
+    if len(cands) > n:
+        listing = "\n".join(f"[{i}] {a['title']} — {a['desc'][:120]}" for i, a in enumerate(cands))
+        r = claude_json(
+            f"아래 기사 목록에서 다음 요청에 가장 잘 맞는 기사를 최대 {n}개 골라, 잘 맞는 순서대로 번호를 주세요. "
+            "요청과 관련 없는 기사는 넣지 마세요. "
+            '도구를 쓰지 말고 다른 말 없이 JSON으로만 답하세요: {"picks": [3, 0, 7]}\n\n'
+            f"요청: {text}\n\n기사 목록:\n{listing}", timeout=180)
+        if r and isinstance(r.get("picks"), list):
+            idx = [i for i in r["picks"] if isinstance(i, int) and 0 <= i < len(cands)]
+            if idx:
+                picked = [cands[i] for i in dict.fromkeys(idx)][:n]
+    for a in picked:
+        a["relevant"] = True
+
+    cat = {"name": f"{topic} 관련", "keywords": queries}
+    results = [(cat, picked)]
+    msg = build_message(f"🔍 '{html.escape(topic)}' 검색 결과", since, fmt(until), results, [], "", len(queries))
+    save_last_news(results)
+    send_telegram(msg)
+
+
 def run_command(dry_run=False):
     now = datetime.now(KST)
     since, until = command_window(now)
@@ -1029,7 +1212,7 @@ def headline_lines(text):
 
 def handle_updates(updates):
     wants_news = wants_help = False
-    selection = headlines = admin = None
+    selection = headlines = admin = range_req = search_req = None
     feedbacks = []
     for u in updates:
         msg = u.get("message") or {}
@@ -1039,6 +1222,10 @@ def handle_updates(updates):
         as_numbers = re.sub(r"[‐‑‒–—―−－~]", "-", text)  # 휴대폰이 바꾼 다른 모양의 '-'도 번호로 인식
         if text in COMMAND_WORDS:
             wants_news = True
+        elif SEARCH_TRIGGER_RE.search(text) and not text.startswith("피드백"):
+            search_req = text   # 예) 휴머노이드 관련 뉴스 5개 찾아줘
+        elif "뉴스" in text and DATE_TOKEN_RE.search(text):
+            range_req = text   # 예) 뉴스 11/10~11/12
         elif SELECTION_RE.match(as_numbers):
             selection = as_numbers  # 여러 번 보냈으면 마지막 것
         elif re.match(r"피드백\s*(목록|삭제|초기화)", text):
@@ -1049,7 +1236,7 @@ def handle_updates(updates):
             headlines = text
         elif text:
             wants_help = True
-    if wants_news or selection or feedbacks or headlines or admin:
+    if wants_news or selection or feedbacks or headlines or admin or range_req or search_req:
         try:   # 받자마자 '입력 중…' 표시
             telegram("sendChatAction", {"chat_id": TELEGRAM_CHAT_ID, "action": "typing"}, tries=1)
         except Exception:
@@ -1059,6 +1246,10 @@ def handle_updates(updates):
 
     if admin:
         run_feedback_admin(admin)
+    if range_req:
+        run_range(range_req)
+    if search_req:
+        run_search(search_req)
     if selection:
         run_selection(selection)
     if feedbacks:
@@ -1068,8 +1259,10 @@ def handle_updates(updates):
     if wants_news:
         send_telegram("🔎 뉴스를 모으고 있어요. 잠시만 기다려 주세요…")
         run_command()
-    elif wants_help and not (selection or feedbacks or headlines or admin):
+    elif wants_help and not (selection or feedbacks or headlines or admin or range_req or search_req):
         send_telegram("• '뉴스' → 전날 오후 5시부터 지금까지의 기사 목록\n"
+                      "• '뉴스 11/10~11/12', '뉴스 11월 14일' → 그 날짜의 기사 목록\n"
+                      "• '휴머노이드 관련 뉴스 5개 찾아줘' → 주제에 맞는 기사를 찾아 목록으로 (날짜도 같이 쓸 수 있어요)\n"
                       "• 번호(예: 1-1*, 4-2, 2-1) → 마지막 목록에서 골라 보고용 양식으로 정리\n"
                       "   * 붙인 기사는 맨 위 '★ 눈에 띄는 뉴스'로 올라가요\n"
                       "• - 로 시작하는 줄(○도 가능) → 마지막 정리본의 ○ 줄을 그 내용으로 바꿔서 다시 보내기\n"
