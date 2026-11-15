@@ -16,11 +16,13 @@ import json
 import html
 import difflib
 import time
+import subprocess
 import urllib.request
 import urllib.parse
 import urllib.error
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
+from html.parser import HTMLParser
 
 # =====================================================================
 # ★★★ API 키 넣는 곳 ★★★
@@ -32,6 +34,9 @@ NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "").strip()          # NAVER
 NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "").strip()  # NAVER API HUB Client Secret
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()    # 텔레그램 봇 토큰
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()        # 받을 사람 chat ID
+# 번호 선택 시 AI 요약용 (둘 중 하나만 있으면 됨, 구독 토큰 우선)
+CLAUDE_CODE_OAUTH_TOKEN = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN", "").strip()  # Claude 구독 토큰 (claude setup-token)
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()              # Claude API 키 (유료, 선택)
 
 # =====================================================================
 # 검색어 설정 (여기만 고치면 검색어를 바꿀 수 있어요)
@@ -110,14 +115,16 @@ COMMAND_WORDS = {"뉴스", "/news"}
 REPORT_TITLE = "[{month}월 {day}일 대동 Daily News]"
 REPORT_GREETING = "안녕하세요? 부회장님."
 REPORT_INTRO = "{day}일 주요 뉴스 전달드리며 금일은 다음의 뉴스가 눈에 띕니다."
-# 카테고리 → 보고서 섹션 이름 (같은 섹션 이름이면 하나로 합쳐짐)
-REPORT_SECTIONS = {
-    "자사뉴스": "자사뉴스",
-    "경쟁사": "경쟁사 및 시장 동향",
-    "시장 동향": "경쟁사 및 시장 동향",
-}
-# 별표(*) 없이 번호만 보냈을 때 '눈에 띄는 뉴스'로 올릴 개수 (앞에서부터)
-DEFAULT_HIGHLIGHTS = 3
+REPORT_INTRO_PLAIN = "{day}일 주요 뉴스 전달드립니다."   # 별표(*) 기사가 없을 때
+# 카테고리 → 보고서 섹션 이름을 다르게 쓰고 싶을 때만 적기 (비어 있으면 카테고리 이름 그대로)
+#   예) "경쟁사": "경쟁사 및 시장 동향", "시장 동향": "경쟁사 및 시장 동향"  → 두 섹션을 하나로 합침
+REPORT_SECTIONS = {}
+
+# AI 요약 설정 (지시문은 clipping_prompt.txt 파일에서 읽음 → 이 파일만 고치면 요약 스타일이 바뀜)
+CLAUDE_MODEL = "claude-sonnet-5-5"
+PROMPT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clipping_prompt.txt")
+# 별표(*) 없이 번호만 보냈을 때 '눈에 띄는 뉴스'로 올릴 개수 (0 = 별표 붙인 기사만 올림)
+DEFAULT_HIGHLIGHTS = 0
 # 마지막으로 보낸 뉴스 목록 저장 파일 (번호 → 기사 찾기용, GitHub이 자동 저장)
 LAST_NEWS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news.json")
 
@@ -455,7 +462,7 @@ def build_message(title, since, until_label, results, failed, first_error, total
         lines.append(f"원인: {html.escape(first_error)}")
         lines.append("")
     lines.append("✏️ 보고용으로 정리하려면 번호를 보내 주세요. 예) 1-1*, 4-2*, 2-1, 3-3")
-    lines.append("   * 붙인 기사 = 눈에 띄는 뉴스 (없으면 앞의 3건)")
+    lines.append("   * 붙인 기사 = 맨 위 '★ 눈에 띄는 뉴스'로 / 나머지는 카테고리별로 정리")
     return "\n".join(lines).strip()
 
 
@@ -537,8 +544,169 @@ def article_link(it):
 
 
 def summary_line(it):
+    if it.get("ai_summary"):
+        return it["ai_summary"].lstrip("☞").strip()
     desc = re.sub(r"\s*(\.\.\.|…)\s*$", "", it.get("desc") or "").strip()
     return desc or it["title"]
+
+
+def headline_line(it):
+    return (it.get("ai_headline") or it["title"]).lstrip("○").strip()
+
+
+# ---------------------------------------------------------------------
+# 기사 본문 가져오기 + AI 요약
+# ---------------------------------------------------------------------
+class _TextGrabber(HTMLParser):
+    """네이버 뉴스 본문(id=dic_area) 또는 일반 기사 <p> 문단 텍스트 수집"""
+    SKIP = {"script", "style", "noscript", "iframe", "figcaption", "button"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.depth = 0          # dic_area 안쪽 깊이
+        self.skip = 0
+        self.in_p = 0
+        self.body, self.paras, self.meta = [], [], ""
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag == "meta" and a.get("property") in ("og:description",) and not self.meta:
+            self.meta = a.get("content") or ""
+        if tag in self.SKIP:
+            self.skip += 1
+        if self.depth:
+            self.depth += 1
+        elif a.get("id") in ("dic_area", "newsct_article", "articleBodyContents", "article-view-content-div"):
+            self.depth = 1
+        if tag == "p":
+            self.in_p += 1
+        if tag == "br" and self.depth:
+            self.body.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in self.SKIP and self.skip:
+            self.skip -= 1
+        if self.depth:
+            self.depth -= 1
+        if tag == "p" and self.in_p:
+            self.in_p -= 1
+
+    def handle_data(self, data):
+        if self.skip:
+            return
+        if self.depth:
+            self.body.append(data)
+        elif self.in_p and len(data.strip()) > 20:
+            self.paras.append(data.strip())
+
+
+def fetch_article_text(it, limit=6000):
+    """기사 본문 텍스트 (실패하면 네이버 요약문)"""
+    for url in [it.get("naver"), it.get("url")]:
+        if not url:
+            continue
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (news clipping bot)"})
+            with urllib.request.urlopen(req, timeout=15) as res:
+                raw = res.read()
+                charset = res.headers.get_content_charset()
+            if not charset:
+                m = re.search(rb'charset=["\']?([\w-]+)', raw[:3000])
+                charset = m.group(1).decode() if m else "utf-8"
+            page = raw.decode(charset, errors="ignore")
+            g = _TextGrabber()
+            g.feed(page)
+            text = re.sub(r"\s+", " ", "".join(g.body)).strip() or " ".join(g.paras) or g.meta
+            if len(text) > 200:
+                return text[:limit]
+        except Exception as e:
+            print(f"[본문 실패] {url}: {e}", file=sys.stderr)
+    return it.get("desc") or ""
+
+
+def load_prompt():
+    try:
+        with open(PROMPT_FILE, encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return "기사를 ☞로 시작하는 한 단락 클리핑으로 압축 요약하고, ○로 시작하는 한 줄 요약도 작성하세요."
+
+
+def build_batch_prompt(targets, items):
+    parts = [load_prompt(), "", "아래 기사들을 위 규칙에 맞게 각각 정리해 주세요.",
+             "도구를 사용하지 말고, 다른 말 없이 아래 JSON 형식으로만 답하세요.",
+             '{"번호": {"headline": "○ 한 줄 요약", "summary": "☞요약 단락"}, ...}', ""]
+    for no in targets:
+        it = items[no]
+        parts += [f"### 번호 {no}", f"기사 제목: {it['title']}", "기사 본문:", fetch_article_text(it), ""]
+    return "\n".join(parts)
+
+
+def subscription_summarize(targets, items):
+    """Claude 구독(Claude Code)으로 한 번에 요약. 결과 {번호: {...}} / 실패 시 {'_error': ...}"""
+    env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}  # 구독 토큰을 쓰도록
+    env["CLAUDE_CODE_OAUTH_TOKEN"] = CLAUDE_CODE_OAUTH_TOKEN
+    try:
+        proc = subprocess.run(
+            ["npx", "-y", "@anthropic-ai/claude-code", "-p", "--output-format", "text"],
+            input=build_batch_prompt(targets, items), capture_output=True, text=True,
+            timeout=600, env=env,
+        )
+        out = proc.stdout.strip()
+        if proc.returncode != 0 or not out:
+            err = (proc.stderr or out or "응답 없음").strip().splitlines()
+            print(f"[구독 요약 실패] {proc.stderr[-500:]}", file=sys.stderr)
+            return {"_error": (err[-1] if err else "실패")[:100]}
+        m = re.search(r"\{.*\}", out, re.S)
+        data = json.loads(m.group(0)) if m else {}
+        return {str(k).replace("번호", "").strip(): v for k, v in data.items() if isinstance(v, dict)}
+    except Exception as e:
+        print(f"[구독 요약 실패] {e}", file=sys.stderr)
+        return {"_error": str(e)[:100]}
+
+
+def ai_summarize(it):
+    """Claude로 ☞ 요약 + ○ 한 줄 요약 생성. 실패하면 None"""
+    if not ANTHROPIC_API_KEY:
+        return None
+    body = fetch_article_text(it)
+    user = (
+        f"기사 제목: {it['title']}\n"
+        f"기사 본문:\n{body}\n\n"
+        "위 기사를 규칙에 맞게 정리해 주세요. 다른 말 없이 아래 JSON 형식으로만 답하세요.\n"
+        '{"headline": "○ 한 줄 요약", "summary": "☞요약 단락"}'
+    )
+    payload = json.dumps({
+        "model": CLAUDE_MODEL,
+        "max_tokens": 1000,
+        "system": load_prompt(),
+        "messages": [{"role": "user", "content": user}],
+    }).encode()
+    req = urllib.request.Request("https://api.anthropic.com/v1/messages", data=payload, headers={
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+    })
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=90) as res:
+                data = json.loads(res.read().decode())
+            text = "".join(c.get("text", "") for c in data.get("content", []) if c.get("type") == "text")
+            m = re.search(r"\{.*\}", text, re.S)
+            result = json.loads(m.group(0)) if m else {"summary": text}
+            return {"summary": (result.get("summary") or "").strip(),
+                    "headline": (result.get("headline") or "").strip()}
+        except urllib.error.HTTPError as e:
+            msg = e.read().decode(errors="ignore")[:200]
+            print(f"[AI 요약 실패] HTTP {e.code} {msg}", file=sys.stderr)
+            if e.code in (429, 500, 529) and attempt < 2:
+                time.sleep(5 * (attempt + 1))
+                continue
+            return {"error": f"HTTP {e.code}"}
+        except Exception as e:
+            print(f"[AI 요약 실패] {e}", file=sys.stderr)
+            return {"error": str(e)[:80]}
+    return None
 
 
 def build_report(picks, items, now):
@@ -548,22 +716,24 @@ def build_report(picks, items, now):
         return None, missing
 
     stars = [f for f in found if f[1]]
-    highlights = stars if stars else found[:DEFAULT_HIGHLIGHTS]
+    highlights = stars if stars else found[:DEFAULT_HIGHLIGHTS] if DEFAULT_HIGHLIGHTS else []
     hl_nos = {f[0] for f in highlights}
     rest = [f for f in found if f[0] not in hl_nos]
 
     def block(it):
         return [f"☞{summary_line(it)}", "", f"원문: {it['title']}", article_link(it), ""]
 
+    intro = REPORT_INTRO if highlights else REPORT_INTRO_PLAIN
     lines = [
         REPORT_TITLE.format(month=now.month, day=now.day), "",
         REPORT_GREETING,
-        REPORT_INTRO.format(month=now.month, day=now.day), "",
+        intro.format(month=now.month, day=now.day), "",
     ]
-    lines += [f"○ {it['title']}" for _, _, it in highlights]
-    lines += ["", "★ 눈에 띄는 뉴스 ★", ""]
-    for _, _, it in highlights:
-        lines += block(it)
+    if highlights:
+        lines += [f"○ {headline_line(it)}" for _, _, it in highlights]
+        lines += ["", "★ 눈에 띄는 뉴스 ★", ""]
+        for _, _, it in highlights:
+            lines += block(it)
 
     # 나머지는 카테고리 순서대로 섹션을 나눠서
     order = [REPORT_SECTIONS.get(c["name"], c["name"]) for c in CATEGORIES]
@@ -573,7 +743,9 @@ def build_report(picks, items, now):
         sections.setdefault(sec, []).append(it)
     for sec in sorted(sections, key=lambda x: order.index(x) if x in order else 99):
         header = f"■ {sec}"
-        lines += ["", header + "-" * max(10, 50 - display_width(header)), ""]
+        if lines[-1] != "" or len(lines) > 6:   # 인사말 바로 뒤가 아니면 섹션 사이 한 줄 더 띄움
+            lines.append("")
+        lines += [header + "-" * max(10, 50 - display_width(header)), ""]
         for it in sections[sec]:
             lines += block(it)
     return "\n".join(lines).strip(), missing
@@ -585,13 +757,46 @@ def run_selection(text):
         return
     with open(LAST_NEWS_FILE, encoding="utf-8") as f:
         data = json.load(f)
-    report, missing = build_report(parse_selection(text), data.get("items", {}), datetime.now(KST))
+    items = data.get("items", {})
+    picks = parse_selection(text)
+    targets = [no for no, _ in picks if no in items]
+    notes = []
+    if targets:
+        if CLAUDE_CODE_OAUTH_TOKEN:
+            send_telegram(f"✏️ {len(targets)}건을 정리하고 있어요. 잠시만 기다려 주세요…")
+            res = subscription_summarize(targets, items)
+            errors = []
+            for no in targets:
+                r = res.get(no) or {}
+                if r.get("summary"):
+                    items[no]["ai_summary"], items[no]["ai_headline"] = r["summary"], r.get("headline", "")
+                else:
+                    errors.append(no)
+            if errors:
+                why = f" (원인: {res['_error']})" if res.get("_error") else ""
+                notes.append("⚠️ AI 요약에 실패해 네이버 요약문으로 대신한 기사: " + ", ".join(errors) + why)
+        elif ANTHROPIC_API_KEY:
+            send_telegram(f"✏️ {len(targets)}건을 정리하고 있어요. 잠시만 기다려 주세요…")
+            errors = []
+            for no in targets:
+                r = ai_summarize(items[no])
+                if r and r.get("summary"):
+                    items[no]["ai_summary"], items[no]["ai_headline"] = r["summary"], r["headline"]
+                else:
+                    errors.append(f"{no}({(r or {}).get('error', '실패')})")
+            if errors:
+                notes.append("⚠️ AI 요약에 실패해 네이버 요약문으로 대신한 기사: " + ", ".join(errors))
+        else:
+            notes.append("ℹ️ CLAUDE_CODE_OAUTH_TOKEN(구독 토큰)이 없어 네이버 요약문으로 정리했어요.")
+    report, missing = build_report(picks, items, datetime.now(KST))
     if report is None:
         send_telegram(f"목록에 없는 번호예요: {html.escape(', '.join(missing))}\n가장 최근에 받은 뉴스 목록의 번호로 보내 주세요.")
         return
     send_telegram(report, plain=True)  # 복사해서 바로 쓸 수 있게 서식 없이 보냄
     if missing:
-        send_telegram(f"⚠️ 목록에 없어서 뺀 번호: {html.escape(', '.join(missing))}")
+        notes.append(f"⚠️ 목록에 없어서 뺀 번호: {', '.join(missing)}")
+    if notes:
+        send_telegram(html.escape("\n".join(notes)))
 
 
 # ---------------------------------------------------------------------
@@ -650,7 +855,7 @@ def run_poll():
     elif wants_help and not selection:
         send_telegram("• '뉴스' → 전날 오후 5시부터 지금까지의 기사 목록\n"
                       "• 번호(예: 1-1*, 4-2, 2-1) → 마지막 목록에서 골라 보고용 양식으로 정리\n"
-                      "   * 붙인 기사는 '눈에 띄는 뉴스'로 올라가요")
+                      "   * 붙인 기사는 맨 위 '★ 눈에 띄는 뉴스'로 올라가요")
     elif not selection:
         print("처리할 메시지 없음")
 
