@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-16T00:15:45.936371+09:00",
+ "saved": "2026-11-16T01:21:49.197862+09:00",
  "items": {
   "3-1": {
    "cat": "시장 동향",
@@ -171,21 +171,13 @@
   },
   "7-5": {
    "cat": "AI",
-   "title": "바디프랜드, 손발 시린 겨울 잡는다…AI 전신 온열케어 제안",
-   "desc": "'퀀텀AI프로'는 등과 허리, 손, 종아리, 발까지 전신 온열 기능을 탑재한 인공지능(AI) 헬스케어로봇이다. 생성형 AI 마사지 기술을 적용해 음성으로 온열 마사지를 요청하거나 이용 도중 단계를 조절할 수 있어 별도 조작...",
-   "url": "http://www.hansbiz.co.kr/news/articleView.html?idxno=883337",
-   "naver": "http://www.hansbiz.co.kr/news/articleView.html?idxno=883337",
-   "pub": "2026-11-15T20:30:00+09:00"
-  },
-  "7-6": {
-   "cat": "AI",
    "title": "[기고] 피지컬 AI, 현장 잇는 특화망이 경쟁력",
    "desc": "이런 AI가 피지컬 AI로 진화하면 어떻게 될까. AI가 로봇의 머리가 돼 팔과 바퀴를 제어하고, 여러 로봇과 협동해 공장에서 부품을 옮기고, 물류창고를 누비고, 병원 복도를 오가며 물품을 나른다. 현실 공간에서 직접 보고...",
    "url": "https://www.dt.co.kr/article/12095274?ref=naver",
    "naver": "https://n.news.naver.com/mnews/article/029/0003059214?sid=110",
    "pub": "2026-11-15T18:16:00+09:00"
   },
-  "7-7": {
+  "7-6": {
    "cat": "AI",
    "title": "\"AI금융 무산·피지컬 AI 후퇴 위기\"…'젠슨 황 복귀론' 확산",
    "desc": "패트릭 리우 엔비디아 자율주행 수석이사는 청원 글을 통해 “젠슨 황이 없다면 자율주행과 피지컬 AI산업은 수년간 후퇴를 겪을 것”이라고 주장했다. ◇“AI산업 무너질 것” 젠슨 황 퇴진으로 엔비디아 지배력이...",
@@ -193,29 +185,29 @@
    "naver": "https://n.news.naver.com/mnews/article/015/0005353999?sid=104",
    "pub": "2026-11-15T17:54:00+09:00"
   },
+  "7-7": {
+   "cat": "AI",
+   "title": "[한국보건산업진흥원 보건신기술(NET) 인증기업 CEO] AI·코호트 생체 빅...",
+   "desc": "지피는 14년간 연속된 시계열 코호트 데이터 약 4,200만개의 생체 데이터를 토대로 AI 기반 성장 진단·예측 플랫폼을 구축해 온 기업이다. AI 기반 영유아 건강증진 기여로 교육부장관 표창을 수상했으며, 성장 관련...",
+   "url": "https://magazine.hankyung.com/job-joy/article/202611167760d",
+   "naver": "https://magazine.hankyung.com/job-joy/article/202611167760d",
+   "pub": "2026-11-16T01:06:00+09:00"
+  },
   "7-8": {
    "cat": "AI",
-   "title": "“마트만으론 안 된다”…정용진, AI·할리우드·초호화 호텔에 2조원 베...",
-   "desc": "정용진 신세계그룹 회장이 인공지능(AI)과 할리우드 콘텐츠, 초호화 호텔 사업에 잇달아 뛰어들며 유통업을... 15일 유통업계에 따르면 정 회장은 AI 데이터센터와 글로벌 엔터테인먼트, 럭셔리 호텔을 신세계그룹의...",
-   "url": "https://www.munhwa.com/article/11631441?ref=naver",
-   "naver": "https://n.news.naver.com/mnews/article/021/0002832929?sid=101",
-   "pub": "2026-11-16T00:14:00+09:00"
+   "title": "FT “삼성, 반도체 넘어 AI 인프라 도전”…통합 역량 관건",
+   "desc": "삼성그룹이 메모리 반도체를 넘어 인공지능(AI) 데이터센터의 설계부터 건설, 운영, 전력 공급까지 아우르는 종합 AI 인프라 기업으로의 변신을 추진하고 있다는 분석이 나왔다. 다만 계열사 간 사업 조정과 외부 고객...",
+   "url": "https://www.g-enews.com/view.php?ud=2026111523272259769a1f309431_1",
+   "naver": "https://www.g-enews.com/view.php?ud=2026111523272259769a1f309431_1",
+   "pub": "2026-11-16T01:02:00+09:00"
   },
   "7-9": {
    "cat": "AI",
-   "title": "삼성SDI·LG에너지솔루션, 美서 차세대 ESS·AI 데이터센터 배터리 공개",
-   "desc": "선보여 -LG엔솔, AI 데이터센터 통합 전력 인프라 공개 -미국 생산 LFP 배터리 기반 ESS 제품도 전시 삼성SDI와 LG에너지솔루션이 미국 최대 에너지산업 전시회에서 차세대 에너지저장장치(ESS)와 인공지능(AI)...",
-   "url": "http://www.kjdaily.com/article.php?aid=1794755418692239276",
-   "naver": "http://www.kjdaily.com/article.php?aid=1794755418692239276",
-   "pub": "2026-11-16T00:12:00+09:00"
-  },
-  "7-10": {
-   "cat": "AI",
-   "title": "[사설] ‘모두의 창업’ 또 유출, 이런 정부가 AI 혼란 대응할 수 있나",
-   "desc": "사업에 참여한 AI 설루션 업체 플랫폼이 해킹 공격을 당해 참가자 818명의 이름·전화번호·이메일이 유출된 것이다. 지난 6월 1차 사업에서 합격자 5000명의 정보가 새나간 지 5개월 만이다. 1차 때는 정부가 뽑은 AI 업체가...",
-   "url": "https://www.chosun.com/opinion/editorial/2026/11/16/NXK6BMI2BRGRTLT4HBDNUXCBHI/?utm_source=naver&utm_medium=referral&utm_campaign=naver-news",
-   "naver": "https://n.news.naver.com/mnews/article/023/0004009734?sid=110",
-   "pub": "2026-11-16T00:11:00+09:00"
+   "title": "한 총리, ‘AI 부정행위’ 대응 관계부처 회의…수능시험장 관리 강화 ...",
+   "desc": "한성숙 국무총리는 오늘(16일) 관계 부처와 함께 '인공지능(AI) 활용 부정행위 대응 방안'을 논의합니다. 오늘 회의에는 교육부, 고용노동부, 행정안전부 등 관계 부처 차관이 참석할 예정입니다. 회의에서는 AI를 활용한...",
+   "url": "https://news.kbs.co.kr/news/pc/view/view.do?ncd=8713280&ref=A",
+   "naver": "https://n.news.naver.com/mnews/article/056/0012294240?sid=100",
+   "pub": "2026-11-16T01:00:00+09:00"
   }
  }
 }
