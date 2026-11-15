@@ -4,7 +4,7 @@
 - 네이버 뉴스 검색 API로 기사 수집 → 카테고리별 정리(중복 제거) → 텔레그램 발송
 
 모드
-  python news_bot.py daily   : 매일 정기 발송 (전날 17:00 ~ 당일 17:00 기사)
+  python news_bot.py daily   : 정기 발송 (월~금 17:00, 일 14:00 / 직전 발송 시각 ~ 이번 발송 시각 기사)
   python news_bot.py poll    : 텔레그램 확인 → '뉴스' 메시지가 있으면 (전날 17:00 ~ 현재 기사) 답장
   python news_bot.py daily --dry-run : 텔레그램 발송 없이 화면에만 출력
 """
@@ -14,6 +14,7 @@ import sys
 import json
 import html
 import difflib
+import time
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -51,30 +52,54 @@ CATEGORIES = [
         "name": "시장 동향",
         "keywords": ["농기계", "트랙터", "건설기계"],
         "max": 10,
+        "max_general": 3,
     },
     {
         "name": "스마트농업&기후위기",
         "keywords": ["스마트농업", "스마트팜", "스마트온실", "기후위기"],
         "max": 10,
+        "max_general": 3,
     },
     {
         "name": "농업정책",
         "keywords": ["농식품부", "농진청"],
         "max": 10,
+        "max_general": 3,
     },
     {
         "name": "로봇&모빌리티",
         "keywords": ["로봇", "농업로봇", "전기스쿠터", "전기이륜차"],
         "max": 10,
+        "max_general": 3,
     },
     {
         "name": "AI",
-        "keywords": ["AI", "인공지능"],
+        "keywords": ["AI", "피지컬AI", "생성형 AI", "인공지능"],
         "max": 10,
+        "max_general": 3,
     },
 ]
 
-# 수집 기준 시각 (17 = 오후 5시). 전날 이 시각부터 모읍니다.
+# max_general = 대동그룹 사업과 직접 관련 없는 일반 기사는 최대 몇 건까지 보여줄지
+#   (관련 기사를 먼저 채우고, 남는 자리에 일반 기사를 이 개수까지만 넣음 / 없으면 제한 없음)
+
+# 대동그룹이 하고 있는 일과 관련된 단어 (제목·요약에 있으면 '관련 기사'로 우선 노출)
+BUSINESS_WORDS = [
+    "대동", "카이오티", "KIOTI", "농업", "농기계", "농촌", "농가", "농민", "영농", "농작업",
+    "트랙터", "콤바인", "이앙기", "스마트팜", "스마트농업", "정밀농업", "디지털농업", "애그테크",
+    "작물", "재배", "수확", "과수", "방제", "드론", "자율주행", "무인", "로봇", "피지컬",
+    "휴머노이드", "모빌리티", "전기스쿠터", "이륜차", "건설기계", "농식품", "식량", "탄소중립",
+]
+# 이 검색어로 찾은 기사는 그 자체로 대동 사업과 관련 있다고 봄
+CORE_KEYWORDS = {"피지컬AI", "농업로봇", "전기스쿠터", "전기이륜차", "스마트농업", "스마트팜",
+                 "스마트온실", "농기계", "트랙터", "농식품부", "농진청"}
+
+# 정기 발송 시각 (요일: 0=월 … 6=일 → 시각). 토요일은 발송 없음.
+# 수집 기간 = 직전 발송 시각 ~ 이번 발송 시각
+#   월: 일 14:00 ~ 월 17:00 / 화~금: 전날 17:00 ~ 당일 17:00 / 일: 금 17:00 ~ 일 14:00
+SEND_SCHEDULE = {0: 17, 1: 17, 2: 17, 3: 17, 4: 17, 6: 14}
+
+# '뉴스' 요청 시: 전날 이 시각부터 현재까지
 CUTOFF_HOUR = 17
 
 # 텔레그램에서 이 단어를 보내면 뉴스를 보내 줍니다
@@ -149,12 +174,23 @@ def at_cutoff(d):
     return datetime(d.year, d.month, d.day, CUTOFF_HOUR, 0, tzinfo=KST)
 
 
+def send_slots(now, days=10):
+    """최근 발송 시각 목록 (최신순)"""
+    slots = []
+    for back in range(days):
+        d = now - timedelta(days=back)
+        hour = SEND_SCHEDULE.get(d.weekday())
+        if hour is not None:
+            t = datetime(d.year, d.month, d.day, hour, 0, tzinfo=KST)
+            if t <= now:
+                slots.append(t)
+    return slots
+
+
 def daily_window(now):
-    """정기 발송: 전날 17:00 ~ 당일 17:00 (17시 이전에 수동 실행하면 하루 전 구간)"""
-    end = at_cutoff(now)
-    if now < end:
-        end -= timedelta(days=1)
-    return end - timedelta(days=1), end
+    """정기 발송: 직전 발송 시각 ~ 이번 발송 시각 (GitHub 실행이 늦어져도 구간은 고정)"""
+    slots = send_slots(now)
+    return slots[1], slots[0]
 
 
 def command_window(now):
@@ -174,20 +210,29 @@ def naver_search(query, start=1):
     req = urllib.request.Request(f"{NAVER_URL}?{params}")
     req.add_header("X-NCP-APIGW-API-KEY-ID", NAVER_CLIENT_ID)
     req.add_header("X-NCP-APIGW-API-KEY", NAVER_CLIENT_SECRET)
-    try:
-        with urllib.request.urlopen(req, timeout=15) as res:
-            return json.loads(res.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        raw = e.read().decode("utf-8", errors="ignore")
-        detail = raw
+    for attempt in range(3):
         try:
-            body = json.loads(raw)
-            err = body.get("error", body) if isinstance(body, dict) else {}
-            detail = " ".join(str(err.get(k, "")) for k in ("errorCode", "message", "errorMessage")).strip() or raw
-        except Exception:
-            pass
-        detail = re.sub(r"\s+", " ", detail)[:150]
-        raise NaverError(f"HTTP {e.code} {detail}".strip())
+            time.sleep(0.1)  # 너무 빠르게 연속 호출하지 않도록
+            with urllib.request.urlopen(req, timeout=15) as res:
+                return json.loads(res.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 500, 502, 503) and attempt < 2:
+                time.sleep(2 * (attempt + 1))  # 잠시 쉬었다 재시도
+                continue
+            raise_naver_error(e)
+
+
+def raise_naver_error(e):
+    raw = e.read().decode("utf-8", errors="ignore")
+    detail = raw
+    try:
+        body = json.loads(raw)
+        err = body.get("error", body) if isinstance(body, dict) else {}
+        detail = " ".join(str(err.get(k, "")) for k in ("errorCode", "message", "errorMessage")).strip() or raw
+    except Exception:
+        pass
+    detail = re.sub(r"\s+", " ", detail)[:150]
+    raise NaverError(f"HTTP {e.code} {detail}".strip())
 
 
 def clean(text):
@@ -228,7 +273,9 @@ def collect(keyword, since, until):
 # 필터
 # ---------------------------------------------------------------------
 def keyword_pattern(kw):
-    k = re.escape(kw)
+    # '생성형 AI' ↔ '생성형AI', '피지컬AI' ↔ '피지컬 AI' 모두 찾도록 띄어쓰기 무시
+    k = re.sub(r"(?<=[가-힣])(?=[A-Za-z])|(?<=[A-Za-z])(?=[가-힣])", " ", kw)
+    k = r"\s*".join(re.escape(part) for part in k.split())
     if kw not in STRICT_KEYWORDS:
         return re.compile(k)
     if re.fullmatch(r"[A-Za-z0-9]+", kw):
@@ -285,6 +332,18 @@ def media_name(url):
     return host or "-"
 
 
+def is_relevant(article):
+    if article["kw"] in CORE_KEYWORDS:
+        return True
+    text = f"{article['title']} {article['desc']}"
+    for w in BUSINESS_WORDS:
+        if w in article["kw"] or article["kw"] in w:
+            continue  # 검색어 자체는 관련성 판단에서 제외 (예: '로봇' 기사에서 '로봇')
+        if w in text:
+            return True
+    return False
+
+
 def gather(since, until):
     """전체 카테고리 수집 → (결과, 실패 검색어, 첫 오류 내용, 전체 검색어 수)"""
     accepted, seen_urls, failed, results = [], set(), [], []
@@ -296,29 +355,38 @@ def gather(since, until):
         for kw in cat["keywords"]:
             total += 1
             try:
-                for a in collect(kw, since, until):
-                    if title_matches(a["title"], kw, a["desc"]):
-                        candidates.append(a)
+                found = collect(kw, since, until)
+                matched = [a for a in found if title_matches(a["title"], kw, a["desc"])]
+                candidates += matched
+                print(f"{kw}: 기간 내 {len(found)}건 / 제목 일치 {len(matched)}건")
             except Exception as e:
                 print(f"[실패] {kw}: {e}", file=sys.stderr)
                 failed.append(kw)
                 first_error = first_error or str(e)
 
-        candidates.sort(key=lambda a: a["pub"], reverse=True)
-        picked = []
         for a in candidates:
-            if len(picked) >= cat["max"]:
-                break
-            if is_duplicate(a, accepted, seen_urls):
-                continue
             # 여러 검색어에 걸리면 가장 구체적인(긴) 검색어로 표시
             matched = [k for k in cat["keywords"] if title_matches(a["title"], k)]
             a["kw"] = max(matched, key=len) if matched else cat["keywords"][0]
+            a["relevant"] = is_relevant(a)
+        # 대동 사업 관련 기사 먼저, 그 안에서는 최신순
+        candidates.sort(key=lambda a: (a["relevant"], a["pub"]), reverse=True)
+        picked, general = [], 0
+        max_general = cat.get("max_general")
+        for a in candidates:
+            if len(picked) >= cat["max"]:
+                break
+            if not a["relevant"] and max_general is not None and general >= max_general:
+                continue
+            if is_duplicate(a, accepted, seen_urls):
+                continue
+            general += 0 if a["relevant"] else 1
             a["_norm"] = norm(a["title"])
             a["_grams"] = bigrams(a["_norm"])
             picked.append(a)
             accepted.append(a)
             seen_urls.update({a["url"], a["naver"]})
+        picked.sort(key=lambda a: (a["relevant"], a["pub"]), reverse=True)
         results.append((cat, picked))
     return results, failed, first_error, total
 
