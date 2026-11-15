@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-대동 홍보팀 데일리 뉴스 클리핑 봇
-- 네이버 뉴스 검색 API로 기사 수집
-- 카테고리별로 정리 (중복 기사 제거)
-- 텔레그램으로 발송
+대동 홍보팀 뉴스 클리핑 봇
+- 네이버 뉴스 검색 API로 기사 수집 → 카테고리별 정리(중복 제거) → 텔레그램 발송
 
-실행: python news_bot.py
-테스트(텔레그램 발송 없이 화면에만 출력): python news_bot.py --dry-run
+모드
+  python news_bot.py daily   : 매일 정기 발송 (전날 17:00 ~ 당일 17:00 기사)
+  python news_bot.py poll    : 텔레그램 확인 → '뉴스' 메시지가 있으면 (전날 17:00 ~ 현재 기사) 답장
+  python news_bot.py daily --dry-run : 텔레그램 발송 없이 화면에만 출력
 """
 import os
 import re
@@ -16,6 +16,7 @@ import html
 import difflib
 import urllib.request
 import urllib.parse
+import urllib.error
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
@@ -25,10 +26,10 @@ from email.utils import parsedate_to_datetime
 # GitHub 저장소 > Settings > Secrets and variables > Actions 에
 # 아래 4개 이름 그대로 등록하면 자동으로 읽어옵니다.
 # =====================================================================
-NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "")          # 네이버 Client ID
-NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")  # 네이버 Client Secret
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")    # 텔레그램 봇 토큰
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")        # 받을 사람 chat ID
+NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "").strip()          # 네이버 Client ID
+NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "").strip()  # 네이버 Client Secret
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()    # 텔레그램 봇 토큰
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()        # 받을 사람 chat ID
 
 # =====================================================================
 # 검색어 설정 (여기만 고치면 검색어를 바꿀 수 있어요)
@@ -69,8 +70,11 @@ CATEGORIES = [
     },
 ]
 
-# 몇 시간 전 기사까지 모을지 (24 = 어제 오후 4시 ~ 오늘 오후 4시)
-HOURS_BACK = 24
+# 수집 기준 시각 (17 = 오후 5시). 전날 이 시각부터 모읍니다.
+CUTOFF_HOUR = 17
+
+# 텔레그램에서 이 단어를 보내면 뉴스를 보내 줍니다
+COMMAND_WORDS = {"뉴스", "/news"}
 
 # 제목에 검색어가 있는 기사만 남기기 (True 권장: 'AI', '로봇'처럼 넓은 검색어의 잡음 제거)
 TITLE_MUST_CONTAIN_KEYWORD = True
@@ -114,23 +118,58 @@ MEDIA_NAMES = {
     "jejunews.com": "제주일보", "ihalla.com": "한라일보", "jemin.com": "제민일보",
     "energy-news.co.kr": "에너지신문", "hellot.net": "헬로티", "irobotnews.com": "로봇신문",
     "motorgraph.com": "모터그래프", "ebn.co.kr": "EBN", "smarttoday.co.kr": "스마트투데이",
+    "worktoday.co.kr": "워크투데이", "gukjenews.com": "국제뉴스",
 }
 
 KST = timezone(timedelta(hours=9))
 NAVER_URL = "https://openapi.naver.com/v1/search/news.json"
-MAX_PAGES = 3  # 검색어당 최대 300건까지 확인
+MAX_PAGES = 5  # 검색어당 최대 500건까지 확인
+DAYS = "월화수목금토일"
 
 
 # ---------------------------------------------------------------------
-# 수집
+# 수집 기간
 # ---------------------------------------------------------------------
+def at_cutoff(d):
+    return datetime(d.year, d.month, d.day, CUTOFF_HOUR, 0, tzinfo=KST)
+
+
+def daily_window(now):
+    """정기 발송: 전날 17:00 ~ 당일 17:00 (17시 이전에 수동 실행하면 하루 전 구간)"""
+    end = at_cutoff(now)
+    if now < end:
+        end -= timedelta(days=1)
+    return end - timedelta(days=1), end
+
+
+def command_window(now):
+    """'뉴스' 요청: 전날 17:00 ~ 현재"""
+    return at_cutoff(now - timedelta(days=1)), now
+
+
+# ---------------------------------------------------------------------
+# 네이버 수집
+# ---------------------------------------------------------------------
+class NaverError(Exception):
+    pass
+
+
 def naver_search(query, start=1):
     params = urllib.parse.urlencode({"query": query, "display": 100, "start": start, "sort": "date"})
     req = urllib.request.Request(f"{NAVER_URL}?{params}")
     req.add_header("X-Naver-Client-Id", NAVER_CLIENT_ID)
     req.add_header("X-Naver-Client-Secret", NAVER_CLIENT_SECRET)
-    with urllib.request.urlopen(req, timeout=15) as res:
-        return json.loads(res.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=15) as res:
+            return json.loads(res.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        detail = ""
+        try:
+            body = json.loads(e.read().decode("utf-8"))
+            detail = f"{body.get('errorCode', '')} {body.get('errorMessage', '')}".strip()
+        except Exception:
+            pass
+        raise NaverError(f"HTTP {e.code} {detail}".strip())
 
 
 def clean(text):
@@ -138,8 +177,8 @@ def clean(text):
     return html.unescape(text).strip()
 
 
-def collect(keyword, since):
-    """검색어 하나로 since 이후 기사 수집"""
+def collect(keyword, since, until):
+    """검색어 하나로 since ~ until 사이 기사 수집 (네이버는 최신순으로 줌)"""
     items = []
     for page in range(MAX_PAGES):
         data = naver_search(keyword, start=1 + page * 100)
@@ -149,6 +188,8 @@ def collect(keyword, since):
             try:
                 pub = parsedate_to_datetime(it["pubDate"]).astimezone(KST)
             except Exception:
+                continue
+            if pub >= until:
                 continue
             if pub < since:
                 reached_old = True
@@ -209,32 +250,88 @@ def media_name(url):
     return host or "-"
 
 
+def gather(since, until):
+    """전체 카테고리 수집 → (결과, 실패 검색어, 첫 오류 내용, 전체 검색어 수)"""
+    accepted, seen_urls, failed, results = [], set(), [], []
+    first_error = ""
+    total = 0
+    # 위 카테고리부터 처리 → 겹치는 기사는 앞 카테고리(자사뉴스)에 남음
+    for cat in CATEGORIES:
+        candidates = []
+        for kw in cat["keywords"]:
+            total += 1
+            try:
+                for a in collect(kw, since, until):
+                    if title_matches(a["title"], kw):
+                        candidates.append(a)
+            except Exception as e:
+                print(f"[실패] {kw}: {e}", file=sys.stderr)
+                failed.append(kw)
+                first_error = first_error or str(e)
+
+        candidates.sort(key=lambda a: a["pub"], reverse=True)
+        picked = []
+        for a in candidates:
+            if len(picked) >= cat["max"]:
+                break
+            if is_duplicate(a, accepted, seen_urls):
+                continue
+            # 여러 검색어에 걸리면 가장 구체적인(긴) 검색어로 표시
+            matched = [k for k in cat["keywords"] if title_matches(a["title"], k)]
+            a["kw"] = max(matched, key=len) if matched else cat["keywords"][0]
+            a["_norm"] = norm(a["title"])
+            picked.append(a)
+            accepted.append(a)
+            seen_urls.update({a["url"], a["naver"]})
+        results.append((cat, picked))
+    return results, failed, first_error, total
+
+
 # ---------------------------------------------------------------------
 # 메시지
 # ---------------------------------------------------------------------
-def build_message(results, now, failed):
-    days = "월화수목금토일"
-    lines = [
-        "📰 <b>데일리 뉴스 클리핑</b>",
-        f"{now:%Y.%m.%d}({days[now.weekday()]}) {now:%H:%M} 기준 · 최근 {HOURS_BACK}시간",
-        "",
-    ]
+def fmt(dt):
+    return f"{dt:%m.%d}({DAYS[dt.weekday()]}) {dt:%H:%M}"
+
+
+def error_hint(err):
+    if "401" in err:
+        return "네이버 Client ID / Client Secret 값을 확인해 주세요 (GitHub Secrets)."
+    if "403" in err:
+        return "네이버 개발자센터 > 내 애플리케이션 > API 설정에서 사용 API에 '검색'을 추가해 주세요."
+    if "429" in err:
+        return "네이버 API 하루 호출 한도를 넘었어요. 내일 다시 시도돼요."
+    return "잠시 후 다시 시도해 주세요."
+
+
+def build_message(title, since, until_label, results, failed, first_error, total):
+    lines = [f"<b>{title}</b>", f"{fmt(since)} ~ {until_label}", ""]
+
+    if failed and len(failed) == total:
+        lines += [
+            "⚠️ 네이버 뉴스를 하나도 가져오지 못했어요.",
+            f"원인: {html.escape(first_error)}",
+            f"해결: {html.escape(error_hint(first_error))}",
+        ]
+        return "\n".join(lines)
+
     for i, (cat, arts) in enumerate(results, 1):
         lines.append(f"<b>{i}. {html.escape(cat['name'])}</b> ({len(arts)}건)")
         if not arts:
             lines.append("- 관련 기사 없음")
         for a in arts:
-            title = html.escape(a["title"])
+            t = html.escape(a["title"])
             url = html.escape(a["url"] or "", quote=True)
             lines.append(
-                f"• [{html.escape(a['kw'])}] <a href=\"{url}\">{title}</a>"
+                f"• [{html.escape(a['kw'])}] <a href=\"{url}\">{t}</a>"
                 f" - {html.escape(media_name(a['url']))} {a['pub']:%m/%d %H:%M}"
             )
             if SHOW_DESCRIPTION and a["desc"]:
                 lines.append(f"   {html.escape(a['desc'][:80])}…")
         lines.append("")
     if failed:
-        lines.append("⚠️ 수집 실패 검색어: " + html.escape(", ".join(failed)))
+        lines.append(f"⚠️ 수집 실패 검색어: {html.escape(', '.join(failed))}")
+        lines.append(f"원인: {html.escape(first_error)}")
     return "\n".join(lines).strip()
 
 
@@ -251,73 +348,109 @@ def split_message(text, limit=3800):
     return chunks
 
 
-def send_telegram(text):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+# ---------------------------------------------------------------------
+# 텔레그램
+# ---------------------------------------------------------------------
+def telegram(method, params):
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/{method}"
+    data = urllib.parse.urlencode(params).encode()
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=30) as res:
+            body = json.loads(res.read().decode())
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"텔레그램 오류 HTTP {e.code}: {e.read().decode(errors='ignore')}")
+    if not body.get("ok"):
+        raise RuntimeError(f"텔레그램 오류: {body}")
+    return body.get("result")
+
+
+def send_telegram(text, dry_run=False):
+    if dry_run:
+        print(text)
+        return
     for chunk in split_message(text):
-        data = urllib.parse.urlencode({
+        telegram("sendMessage", {
             "chat_id": TELEGRAM_CHAT_ID,
             "text": chunk,
             "parse_mode": "HTML",
             "disable_web_page_preview": "true",
-        }).encode()
-        with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=15) as res:
-            body = json.loads(res.read().decode())
-            if not body.get("ok"):
-                raise RuntimeError(f"텔레그램 전송 실패: {body}")
+        })
 
 
 # ---------------------------------------------------------------------
 # 실행
 # ---------------------------------------------------------------------
+def run_daily(dry_run=False):
+    now = datetime.now(KST)
+    since, until = daily_window(now)
+    results, failed, err, total = gather(since, until)
+    msg = build_message("📰 데일리 뉴스 클리핑", since, fmt(until), results, failed, err, total)
+    send_telegram(msg, dry_run)
+    print("정기 발송 완료")
+
+
+def run_command(dry_run=False):
+    now = datetime.now(KST)
+    since, until = command_window(now)
+    results, failed, err, total = gather(since, until)
+    msg = build_message("🔎 요청하신 뉴스", since, f"현재({fmt(until)})", results, failed, err, total)
+    send_telegram(msg, dry_run)
+    print("요청 답장 완료")
+
+
+def run_poll():
+    """텔레그램에 쌓인 메시지 확인 → 내 채팅에서 '뉴스'가 왔으면 답장"""
+    updates = telegram("getUpdates", {"timeout": 0, "allowed_updates": '["message"]'})
+    if not updates:
+        print("새 메시지 없음")
+        return
+
+    # 확인한 메시지는 바로 '읽음' 처리 → 다음 확인 때 중복 답장 방지
+    last_id = max(u["update_id"] for u in updates)
+    telegram("getUpdates", {"offset": last_id + 1, "timeout": 0, "limit": 1})
+
+    wants_news = wants_help = False
+    for u in updates:
+        msg = u.get("message") or {}
+        if str(msg.get("chat", {}).get("id")) != TELEGRAM_CHAT_ID:
+            continue  # 등록된 내 채팅이 아니면 무시
+        text = (msg.get("text") or "").strip()
+        if text in COMMAND_WORDS:
+            wants_news = True
+        elif text:
+            wants_help = True
+
+    if wants_news:
+        send_telegram("🔎 뉴스를 모으고 있어요. 잠시만 기다려 주세요…")
+        run_command()
+    elif wants_help:
+        send_telegram("'뉴스'라고 보내 주시면 전날 오후 5시부터 지금까지의 기사를 정리해 드려요.")
+    else:
+        print("처리할 메시지 없음")
+
+
 def main():
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    mode = (args[0] if args else os.environ.get("MODE", "daily")).strip() or "daily"
     dry_run = "--dry-run" in sys.argv
 
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        if not dry_run:
+            sys.exit("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID 가 설정되지 않았어요.")
+
+    if mode == "poll":
+        run_poll()
+        return
+
     if not (NAVER_CLIENT_ID and NAVER_CLIENT_SECRET):
-        sys.exit("NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 이 설정되지 않았어요.")
-    if not dry_run and not (TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID):
-        sys.exit("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID 가 설정되지 않았어요.")
+        msg = "⚠️ NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 이 GitHub Secrets에 없어요."
+        send_telegram(msg, dry_run)
+        sys.exit(msg)
 
-    now = datetime.now(KST)
-    since = now - timedelta(hours=HOURS_BACK)
-    accepted, seen_urls, failed, results = [], set(), [], []
-
-    # 위 카테고리부터 순서대로 처리 → 겹치는 기사는 앞 카테고리(자사뉴스)에 남음
-    for cat in CATEGORIES:
-        candidates = []
-        for kw in cat["keywords"]:
-            try:
-                for a in collect(kw, since):
-                    if title_matches(a["title"], kw):
-                        a["kw"] = kw
-                        candidates.append(a)
-            except Exception as e:
-                print(f"[실패] {kw}: {e}", file=sys.stderr)
-                failed.append(kw)
-
-        candidates.sort(key=lambda a: a["pub"], reverse=True)
-        picked = []
-        for a in candidates:
-            if len(picked) >= cat["max"]:
-                break
-            if is_duplicate(a, accepted, seen_urls):
-                continue
-            # 같은 기사가 여러 검색어에 걸리면 가장 구체적인(긴) 검색어로 표시
-            matched = [k for k in cat["keywords"] if title_matches(a["title"], k)]
-            if matched:
-                a["kw"] = max(matched, key=len)
-            a["_norm"] = norm(a["title"])
-            picked.append(a)
-            accepted.append(a)
-            seen_urls.update({a["url"], a["naver"]})
-        results.append((cat, picked))
-
-    message = build_message(results, now, failed)
-
-    if dry_run:
-        print(message)
+    if mode == "command":
+        run_command(dry_run)
     else:
-        send_telegram(message)
-        print("텔레그램 전송 완료")
+        run_daily(dry_run)
 
 
 if __name__ == "__main__":
