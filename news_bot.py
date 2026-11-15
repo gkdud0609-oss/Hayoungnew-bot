@@ -40,13 +40,17 @@ CATEGORIES = [
         "name": "자사뉴스",
         "keywords": ["대동", "대동기어", "대동모빌리티", "대동금속", "하이드로텍",
                      "제주대동", "대동애그테크", "대동에이아이랩", "대동로보틱스"],
-        "max": 30,
+        "max": 10,
     },
     {
-        "name": "경쟁사 및 시장 동향",
-        "keywords": ["TYM", "LS엠트론", "존디어", "구보다", "얀마", "농기계",
-                     "트랙터", "건설기계", "HD건설기계", "두산밥캣"],
-        "max": 15,
+        "name": "경쟁사",
+        "keywords": ["TYM", "LS엠트론", "존디어", "구보다", "얀마", "HD건설기계", "두산밥캣"],
+        "max": 10,
+    },
+    {
+        "name": "시장 동향",
+        "keywords": ["농기계", "트랙터", "건설기계"],
+        "max": 10,
     },
     {
         "name": "스마트농업&기후위기",
@@ -87,11 +91,21 @@ STRICT_KEYWORDS = {"대동", "구보다", "얀마", "TYM", "AI"}
 EXCLUDE_WORDS = {
     "대동": ["대동맥", "대동강", "대동여지도", "대동단결", "대동제", "대동병원",
              "대동소이", "대동세상", "대동계", "대동법", "대동문", "대동초", "대동중",
-             "대동고", "대동역", "대동동"],
+             "대동고", "대동역", "대동동", "대동하", "대동한", "대동했", "대동해",
+             "대동할", "대동된", "대동돼", "대동시켜", "대동천", "대동면", "대동리"],
 }
 
-# 같은 기사로 볼 제목 유사도 (0~1, 높을수록 엄격)
-SIMILARITY_THRESHOLD = 0.8
+# '대동'처럼 뜻이 여러 개인 검색어는 제목·요약에 아래 단어 중 하나가 있어야 대동그룹 기사로 인정
+CONTEXT_REQUIRED = {
+    "대동": ["대동그룹", "대동 그룹", "대동공업", "농기계", "트랙터", "콤바인", "이앙기", "농업",
+             "농촌", "농가", "스마트팜", "스마트농업", "정밀농업", "애그테크", "농식품",
+             "카이오티", "KIOTI", "Kioti", "원유현", "김준식", "김형철", "대동커넥트", "커넥트",
+             "드론", "로봇", "모빌리티", "전기스쿠터", "이륜차", "기어", "금속", "하이드로텍"],
+}
+
+# 같은 기사로 볼 제목 유사도 (0~1, 낮을수록 더 많이 합침)
+SIMILARITY_THRESHOLD = 0.6     # 문장 순서까지 비슷한 정도
+OVERLAP_THRESHOLD = 0.45       # 들어간 글자 조각이 겹치는 정도 (같은 보도자료를 다르게 쓴 제목)
 
 # 기사 요약(네이버 description)도 함께 보낼지
 SHOW_DESCRIPTION = False
@@ -222,9 +236,13 @@ def keyword_pattern(kw):
     return re.compile(rf"(?<![가-힣A-Za-z]){k}")
 
 
-def title_matches(title, kw):
+def title_matches(title, kw, desc=None):
     if any(w in title for w in EXCLUDE_WORDS.get(kw, [])):
         return False
+    if desc is not None and kw in CONTEXT_REQUIRED:
+        text = f"{title} {desc}"
+        if not any(w in text for w in CONTEXT_REQUIRED[kw]):
+            return False
     if not TITLE_MUST_CONTAIN_KEYWORD:
         return True
     return bool(keyword_pattern(kw).search(title))
@@ -235,12 +253,25 @@ def norm(title):
     return re.sub(r"[^0-9A-Za-z가-힣]", "", title)
 
 
+def bigrams(text):
+    return {text[i:i + 2] for i in range(len(text) - 1)} or {text}
+
+
 def is_duplicate(article, accepted, seen_urls):
     if article["url"] in seen_urls or article["naver"] in seen_urls:
         return True
     n = norm(article["title"])
+    grams = bigrams(n)
     for a in accepted:
-        if n == a["_norm"] or difflib.SequenceMatcher(None, n, a["_norm"]).ratio() >= SIMILARITY_THRESHOLD:
+        if n == a["_norm"]:
+            return True
+        overlap = len(grams & a["_grams"]) / max(1, min(len(grams), len(a["_grams"])))
+        if overlap >= OVERLAP_THRESHOLD + 0.2:   # 짧은 제목이 긴 제목에 거의 다 포함
+            return True
+        jaccard = len(grams & a["_grams"]) / max(1, len(grams | a["_grams"]))
+        if jaccard >= OVERLAP_THRESHOLD:
+            return True
+        if difflib.SequenceMatcher(None, n, a["_norm"]).ratio() >= SIMILARITY_THRESHOLD:
             return True
     return False
 
@@ -266,7 +297,7 @@ def gather(since, until):
             total += 1
             try:
                 for a in collect(kw, since, until):
-                    if title_matches(a["title"], kw):
+                    if title_matches(a["title"], kw, a["desc"]):
                         candidates.append(a)
             except Exception as e:
                 print(f"[실패] {kw}: {e}", file=sys.stderr)
@@ -284,6 +315,7 @@ def gather(since, until):
             matched = [k for k in cat["keywords"] if title_matches(a["title"], k)]
             a["kw"] = max(matched, key=len) if matched else cat["keywords"][0]
             a["_norm"] = norm(a["title"])
+            a["_grams"] = bigrams(a["_norm"])
             picked.append(a)
             accepted.append(a)
             seen_urls.update({a["url"], a["naver"]})
