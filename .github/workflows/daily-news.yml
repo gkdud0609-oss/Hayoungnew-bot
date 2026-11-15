@@ -2,22 +2,30 @@ name: 데일리 뉴스 클리핑
 
 on:
   schedule:
-    - cron: "0 7 * * *"   # 매일 07:00 UTC = 한국시간 오후 4시
-  workflow_dispatch:       # Actions 탭에서 'Run workflow' 버튼으로 바로 실행 가능
+    - cron: "0 8 * * *"     # 매일 08:00 UTC = 한국시간 오후 5시 정기 발송
+    - cron: "*/5 * * * *"   # 5분마다 텔레그램 확인 ('뉴스' 요청 답장)
+  workflow_dispatch:         # Actions 탭에서 'Run workflow' 버튼으로 바로 실행
+    inputs:
+      mode:
+        description: "daily = 정기 발송 테스트 / command = '뉴스' 답장 테스트"
+        default: daily
+        type: choice
+        options: [daily, command]
 
 jobs:
-  send-news:
+  run:
     runs-on: ubuntu-latest
+    concurrency:
+      # 같은 종류의 실행이 겹치지 않게 (중복 답장 방지)
+      group: news-${{ github.event.schedule == '*/5 * * * *' && 'poll' || 'daily' }}
+      cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - uses: actions/checkout@v5
 
       - name: 뉴스 수집 및 텔레그램 발송
-        run: python news_bot.py
+        run: python3 news_bot.py
         env:
+          MODE: ${{ inputs.mode || (github.event.schedule == '*/5 * * * *' && 'poll' || 'daily') }}
           # ★ 실제 값은 GitHub Secrets에 넣어요 (이 파일은 수정할 필요 없음)
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
