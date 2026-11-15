@@ -2,7 +2,8 @@ name: 데일리 뉴스 클리핑
 
 on:
   schedule:
-    - cron: "0 8 * * *"     # 매일 08:00 UTC = 한국시간 오후 5시 정기 발송
+    - cron: "0 8 * * 1-5"   # 월~금 08:00 UTC = 한국시간 오후 5시 정기 발송
+    - cron: "0 5 * * 0"     # 일요일 05:00 UTC = 한국시간 오후 2시 (금 17시 ~ 일 14시 기사)
     - cron: "*/5 * * * *"   # 5분마다 텔레그램 확인 ('뉴스' 요청 답장)
   workflow_dispatch:         # Actions 탭에서 'Run workflow' 버튼으로 바로 실행
     inputs:
@@ -31,3 +32,4 @@ jobs:
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
