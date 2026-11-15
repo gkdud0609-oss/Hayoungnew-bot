@@ -4,11 +4,11 @@ on:
   schedule:
     - cron: "0 8 * * 1-5"   # 월~금 08:00 UTC = 한국시간 오후 5시 정기 발송
     - cron: "0 5 * * 0"     # 일요일 05:00 UTC = 한국시간 오후 2시 (금 17시 ~ 일 14시 기사)
-    - cron: "*/5 * * * *"   # 5분마다 텔레그램 확인 ('뉴스' 요청 답장)
+    - cron: "*/5 * * * *"   # 텔레그램 지켜보기 (한 번에 25분, 끝나면 대기 중인 다음 실행이 바로 이어받음)
   workflow_dispatch:         # Actions 탭에서 'Run workflow' 버튼으로 바로 실행
     inputs:
       mode:
-        description: "daily = 정기 발송 / command = '뉴스' 답장 / poll = 보낸 메시지 바로 처리"
+        description: "daily = 정기 발송 / command = '뉴스' 답장 / poll = 텔레그램 지켜보기 시작"
         default: daily
         type: choice
         options: [daily, command, poll]
@@ -19,9 +19,10 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     concurrency:
-      # 같은 종류의 실행이 겹치지 않게 (중복 답장 방지)
-      group: news-${{ github.event.schedule == '*/5 * * * *' && 'poll' || 'daily' }}
+      # 텔레그램 지켜보기는 한 번에 하나만 (중복 답장 방지)
+      group: news-${{ (github.event.schedule == '*/5 * * * *' || inputs.mode == 'poll') && 'poll' || 'daily' }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v5
@@ -37,14 +38,14 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}   # Claude 구독 토큰 (AI 요약)
 
-      - name: 마지막 뉴스 목록 저장 (번호로 고르기용)
+      - name: 봇 데이터 저장 (뉴스 목록·정리본·피드백)
         if: always()
         run: |
-          if [ -f last_news.json ] && [ -n "$(git status --porcelain last_news.json)" ]; then
+          if [ -n "$(git status --porcelain -- last_news.json last_report.json style_feedback.txt)" ]; then
             git config user.name "news-bot"
             git config user.email "news-bot@users.noreply.github.com"
-            git add last_news.json
-            git commit -m "최근 뉴스 목록 저장"
-            git pull --rebase -q || true
+            git add -A -- last_news.json last_report.json style_feedback.txt
+            git commit -m "봇 데이터 저장"
+            git pull --rebase -X theirs -q || true
             git push
           fi
