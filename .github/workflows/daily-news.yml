@@ -8,7 +8,7 @@ on:
   workflow_dispatch:         # Actions 탭에서 'Run workflow' 버튼으로 바로 실행
     inputs:
       mode:
-        description: "daily = 정기 발송 테스트 / command = '뉴스' 답장 테스트"
+        description: "daily = 정기 발송 / command = '뉴스' 답장 / poll = 보낸 메시지 바로 처리"
         default: daily
         type: choice
         options: [daily, command, poll]
@@ -35,6 +35,7 @@ jobs:
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}   # Claude 구독 토큰 (AI 요약)
 
       - name: 마지막 뉴스 목록 저장 (번호로 고르기용)
         if: always()
