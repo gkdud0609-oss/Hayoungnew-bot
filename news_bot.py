@@ -574,12 +574,15 @@ def pull_last_news():
         git("pull", "--rebase", "-X", "theirs", "-q")
 
 
-def save_last_news(results):
+def save_last_news(results, flat=False):
+    """flat=True: 검색 결과처럼 1, 2, 3… 번호로 저장 (카테고리는 기사마다 a['cat'])"""
     items = {}
+    n = 0
     for i, (cat, arts) in enumerate(results, 1):
         for j, a in enumerate(arts, 1):
-            items[f"{i}-{j}"] = {
-                "cat": cat["name"], "title": a["title"], "desc": a["desc"],
+            n += 1
+            items[str(n) if flat else f"{i}-{j}"] = {
+                "cat": a.get("cat") or cat["name"], "title": a["title"], "desc": a["desc"],
                 "url": a["url"], "naver": a["naver"], "pub": a["pub"].isoformat(),
             }
     with open(LAST_NEWS_FILE, "w", encoding="utf-8") as f:
@@ -587,14 +590,15 @@ def save_last_news(results):
     push_last_news()
 
 
-SELECTION_RE = re.compile(r"^\s*\d+\s*-\s*\d+\s*\*?(\s*[,，/·\s]\s*\d+\s*-\s*\d+\s*\*?)*\s*$")
+_NO = r"\d+(?:\s*-\s*\d+)?\s*\*?"          # 1-1, 1-1*, 3, 3*
+SELECTION_RE = re.compile(rf"^\s*{_NO}(\s*[,，/·\s]\s*{_NO})*\s*$")
 
 
 def parse_selection(text):
-    """'1-1*, 2-3 3-1' → [('1-1', True), ('2-3', False), ('3-1', False)]"""
+    """'1-1*, 2-3 3-1' → [('1-1', True), ('2-3', False), ('3-1', False)] / '1*, 3' → [('1', True), ('3', False)]"""
     picks = []
-    for m in re.finditer(r"(\d+)\s*-\s*(\d+)\s*(\*?)", text):
-        no = f"{int(m.group(1))}-{int(m.group(2))}"
+    for m in re.finditer(r"(\d+)(?:\s*-\s*(\d+))?\s*(\*?)", text):
+        no = f"{int(m.group(1))}-{int(m.group(2))}" if m.group(2) else str(int(m.group(1)))
         if no not in [p[0] for p in picks]:
             picks.append((no, bool(m.group(3))))
     return picks
@@ -757,7 +761,7 @@ def summarize_one(no, items, env):
         return no, None, str(e)[:100]
 
 
-def claude_ask(prompt, timeout=180):
+def claude_ask(prompt, timeout=180, extra=None):
     """Claude 구독으로 짧은 질문 → 답 텍스트 (실패 시 None)"""
     if not CLAUDE_CODE_OAUTH_TOKEN:
         return None
@@ -765,7 +769,8 @@ def claude_ask(prompt, timeout=180):
     env["CLAUDE_CODE_OAUTH_TOKEN"] = CLAUDE_CODE_OAUTH_TOKEN
     try:
         proc = subprocess.run(
-            claude_cli() + ["-p", "--output-format", "text", "--model", CLAUDE_CODE_MODEL, "--max-turns", "1"],
+            claude_cli() + ["-p", "--output-format", "text", "--model", CLAUDE_CODE_MODEL]
+            + (extra or ["--max-turns", "1"]),
             input=prompt, capture_output=True, text=True, timeout=timeout, env=env,
         )
         if proc.returncode == 0 and proc.stdout.strip():
@@ -1109,10 +1114,56 @@ def run_range(text, dry_run=False):
     print("기간 지정 답장 완료")
 
 
-SEARCH_TRIGGER_RE = re.compile(r"찾아|^검색")
+SEARCH_TRIGGER_RE = re.compile(r"찾아|검색")
+
+# ---- 텔레그램 대화 (명령이 아닌 말은 Claude가 대화로 답함) ----
+CHAT_ENABLED = False   # True로 바꾸면 명령이 아닌 말에 Claude가 대화로 답함
+CHAT_HISTORY_TURNS = 10   # 앞 대화를 몇 번까지 기억할지 (한 번의 실행 안에서만, 저장소에는 저장 안 함)
+CHAT_PROMPT = (
+    "당신은 농기계·스마트농업·로봇·모빌리티 기업 대동그룹 홍보팀 담당자를 돕는 텔레그램 비서입니다. "
+    "보도자료·기사 요약·문장 다듬기·업계 질문 등을 돕습니다. "
+    "텔레그램 메시지로 읽기 좋게 짧고 핵심 위주로 답하고, 표·마크다운 기호(#, **)는 쓰지 마세요. "
+    "최신 정보가 필요하면 웹 검색 도구를 쓰고, 확실하지 않은 내용은 추측하지 말고 모른다고 말하세요."
+)
+_chat_history = []   # [(사용자, 답변), ...] — 실행이 끝나면 사라짐
+
+
+def run_chat(text):
+    global _chat_history
+    if text.strip() in ("대화 초기화", "새 대화"):
+        _chat_history = []
+        send_telegram("🧹 대화를 새로 시작할게요.")
+        return
+    if not CLAUDE_CODE_OAUTH_TOKEN:
+        send_help()
+        return
+    history = "\n\n".join(f"[담당자] {u}\n[비서] {a}" for u, a in _chat_history[-CHAT_HISTORY_TURNS:])
+    prompt = CHAT_PROMPT + (f"\n\n[지금까지 대화]\n{history}" if history else "") + f"\n\n[담당자] {text}\n[비서]"
+    answer = claude_ask(prompt, timeout=240,
+                        extra=["--allowedTools", "WebSearch,WebFetch", "--max-turns", "8"])
+    if not answer:
+        send_telegram("😥 지금은 답을 만들지 못했어요. 잠시 후 다시 보내 주세요.")
+        return
+    _chat_history.append((text, answer))
+    send_telegram(answer, plain=True)
+
+
+def send_help():
+    send_telegram("• '뉴스' → 전날 오후 5시부터 지금까지의 기사 목록\n"
+                  "• '뉴스 11/10~11/12', '뉴스 11월 14일' → 그 날짜의 기사 목록\n"
+                  "• '대동모빌리티 검색해줘', '휴머노이드 관련 뉴스 5개 찾아줘' → 주제에 맞는 기사를 1, 2, 3… 번호 목록으로\n"
+                  "• 번호(예: 1-1*, 4-2, 2-1) → 마지막 목록에서 골라 보고용 양식으로 정리\n"
+                  "   * 붙인 기사는 맨 위 '★ 눈에 띄는 뉴스'로 올라가요\n"
+                  "• - 로 시작하는 줄(○도 가능) → 마지막 정리본의 ○ 줄을 그 내용으로 바꿔서 다시 보내기\n"
+                  "• 피드백: 내용 → 요약 스타일에 계속 반영 + 마지막 정리본 다시 쓰기\n"
+                  "• 피드백 목록 / 피드백 삭제 2 / 피드백 초기화\n"
+                  + ("• 그 밖의 말 → Claude와 대화 ('대화 초기화'로 새로 시작)\n" if CHAT_ENABLED else "")
+                  + "• '도움말' → 이 안내")
+
+
 SEARCH_FILLER_RE = re.compile(
     r"관련된|관련|에\s*대한|에\s*대해|에\s*관한|내용의|내용이|내용|뉴스들?|기사들?|"
-    r"찾아서|찾아줘|찾아\s*줘|찾아봐|찾아|알려줘|알려\s*줘|알려|보여줘|^검색|좀|"
+    r"찾아서|찾아줘|찾아\s*줘|찾아봐|찾아|검색해\s*줘|검색해서|검색해|검색|알려줘|알려\s*줘|알려|보여줘|좀|"
     r"몇\s*[개건]\s*만?|\d+\s*[개건]\s*만?|있는지|있나|있으면|해줘|부탁해?|요$"
 )
 
@@ -1127,6 +1178,7 @@ def parse_search(text, now):
     topic = re.sub(r"부터|까지|~", " ", topic)
     topic = SEARCH_FILLER_RE.sub(" ", topic)
     topic = re.sub(r"\s+", " ", topic).strip(" ,.?!")
+    topic = re.sub(r"(을|를|에서|으로|로)$", "", topic).strip()   # 끝에 붙은 조사 떼기
     return topic, n, since, until
 
 
@@ -1182,14 +1234,20 @@ def run_search(text):
             idx = [i for i in r["picks"] if isinstance(i, int) and 0 <= i < len(cands)]
             if idx:
                 picked = [cands[i] for i in dict.fromkeys(idx)][:n]
-    for a in picked:
-        a["relevant"] = True
+    # 보고용 정리본 섹션을 위해 기사마다 카테고리 붙이기 (제목에 걸리는 첫 카테고리, 없으면 주제)
+    for art in picked:
+        art["cat"] = next((c["name"] for c in CATEGORIES
+                           if any(title_matches(art["title"], k, art["desc"]) for k in c["keywords"])), topic)
 
-    cat = {"name": f"{topic} 관련", "keywords": queries}
-    results = [(cat, picked)]
-    msg = build_message(f"🔍 '{html.escape(topic)}' 검색 결과", since, fmt(until), results, [], "", len(queries))
-    save_last_news(results)
-    send_telegram(msg)
+    lines = [f"<b>🔍 '{html.escape(topic)}' 검색 결과</b> ({len(picked)}건)",
+             f"{fmt(since)} ~ {fmt(until)}", ""]
+    for i, art in enumerate(picked, 1):
+        url = html.escape(art["url"] or "", quote=True)
+        lines.append(f"<b>{i}.</b> <a href=\"{url}\">{html.escape(art['title'])}</a>"
+                     f" - {html.escape(media_name(art['url']))} {art['pub']:%m/%d %H:%M}")
+    lines += ["", "✏️ 보고용으로 정리하려면 번호를 보내 주세요. 예) 1*, 3, 4"]
+    save_last_news([({"name": topic}, picked)], flat=True)
+    send_telegram("\n".join(lines))
 
 
 def run_command(dry_run=False):
@@ -1212,6 +1270,7 @@ def headline_lines(text):
 
 def handle_updates(updates):
     wants_news = wants_help = False
+    chats = []
     selection = headlines = admin = range_req = search_req = None
     feedbacks = []
     for u in updates:
@@ -1234,15 +1293,20 @@ def handle_updates(updates):
             feedbacks.append(text)
         elif headline_lines(text):
             headlines = text
-        elif text:
+        elif text in ("도움말", "/help", "/start", "?"):
             wants_help = True
-    if wants_news or selection or feedbacks or headlines or admin or range_req or search_req:
+        elif text:
+            if CHAT_ENABLED:
+                chats.append(text)
+            else:
+                wants_help = True
+    if wants_news or selection or feedbacks or headlines or admin or range_req or search_req or chats:
         try:   # 받자마자 '입력 중…' 표시
             telegram("sendChatAction", {"chat_id": TELEGRAM_CHAT_ID, "action": "typing"}, tries=1)
         except Exception:
             pass
     print(f"메시지 확인: 뉴스요청={wants_news} / 번호={selection} / ○줄={bool(headlines)} "
-          f"/ 피드백={len(feedbacks)} / 기타={wants_help}")
+          f"/ 피드백={len(feedbacks)} / 대화={len(chats)} / 도움말={wants_help}")
 
     if admin:
         run_feedback_admin(admin)
@@ -1259,15 +1323,10 @@ def handle_updates(updates):
     if wants_news:
         send_telegram("🔎 뉴스를 모으고 있어요. 잠시만 기다려 주세요…")
         run_command()
-    elif wants_help and not (selection or feedbacks or headlines or admin or range_req or search_req):
-        send_telegram("• '뉴스' → 전날 오후 5시부터 지금까지의 기사 목록\n"
-                      "• '뉴스 11/10~11/12', '뉴스 11월 14일' → 그 날짜의 기사 목록\n"
-                      "• '휴머노이드 관련 뉴스 5개 찾아줘' → 주제에 맞는 기사를 찾아 목록으로 (날짜도 같이 쓸 수 있어요)\n"
-                      "• 번호(예: 1-1*, 4-2, 2-1) → 마지막 목록에서 골라 보고용 양식으로 정리\n"
-                      "   * 붙인 기사는 맨 위 '★ 눈에 띄는 뉴스'로 올라가요\n"
-                      "• - 로 시작하는 줄(○도 가능) → 마지막 정리본의 ○ 줄을 그 내용으로 바꿔서 다시 보내기\n"
-                      "• 피드백: 내용 → 요약 스타일에 계속 반영 + 마지막 정리본 다시 쓰기\n"
-                      "• 피드백 목록 / 피드백 삭제 2 / 피드백 초기화")
+    elif wants_help:
+        send_help()
+    for c in chats:
+        run_chat(c)
 
 
 def run_poll():
