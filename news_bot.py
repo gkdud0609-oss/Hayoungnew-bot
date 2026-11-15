@@ -5,7 +5,8 @@
 
 모드
   python news_bot.py daily   : 정기 발송 (월~금 17:00, 일 14:00 / 직전 발송 시각 ~ 이번 발송 시각 기사)
-  python news_bot.py poll    : 텔레그램 확인 → '뉴스' 메시지가 있으면 (전날 17:00 ~ 현재 기사) 답장
+  python news_bot.py poll    : 텔레그램 확인 → '뉴스'면 (전날 17:00 ~ 현재 기사) 답장,
+                              '1-1, 2-3*' 같은 번호면 마지막으로 보낸 목록에서 골라 보고용 양식으로 정리해 답장
   python news_bot.py daily --dry-run : 텔레그램 발송 없이 화면에만 출력
 """
 import os
@@ -104,6 +105,21 @@ CUTOFF_HOUR = 17
 
 # 텔레그램에서 이 단어를 보내면 뉴스를 보내 줍니다
 COMMAND_WORDS = {"뉴스", "/news"}
+
+# ---- 보고용 정리 양식 (번호를 보내면 이 양식으로 정리) ----
+REPORT_TITLE = "[{month}월 {day}일 대동 Daily News]"
+REPORT_GREETING = "안녕하세요? 부회장님."
+REPORT_INTRO = "{day}일 주요 뉴스 전달드리며 금일은 다음의 뉴스가 눈에 띕니다."
+# 카테고리 → 보고서 섹션 이름 (같은 섹션 이름이면 하나로 합쳐짐)
+REPORT_SECTIONS = {
+    "자사뉴스": "자사뉴스",
+    "경쟁사": "경쟁사 및 시장 동향",
+    "시장 동향": "경쟁사 및 시장 동향",
+}
+# 별표(*) 없이 번호만 보냈을 때 '눈에 띄는 뉴스'로 올릴 개수 (앞에서부터)
+DEFAULT_HIGHLIGHTS = 3
+# 마지막으로 보낸 뉴스 목록 저장 파일 (번호 → 기사 찾기용, GitHub이 자동 저장)
+LAST_NEWS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news.json")
 
 # 제목에 검색어가 있는 기사만 남기기 (True 권장: 'AI', '로봇'처럼 넓은 검색어의 잡음 제거)
 TITLE_MUST_CONTAIN_KEYWORD = True
@@ -367,7 +383,8 @@ def gather(since, until):
         for a in candidates:
             # 여러 검색어에 걸리면 가장 구체적인(긴) 검색어로 표시
             matched = [k for k in cat["keywords"] if title_matches(a["title"], k)]
-            a["kw"] = max(matched, key=len) if matched else cat["keywords"][0]
+            a["kw"] = (max(matched, key=lambda k: (len(k.replace(" ", "")), k in CORE_KEYWORDS))
+                       if matched else cat["keywords"][0])
             a["relevant"] = is_relevant(a)
         # 대동 사업 관련 기사 먼저, 그 안에서는 최신순
         candidates.sort(key=lambda a: (a["relevant"], a["pub"]), reverse=True)
@@ -423,11 +440,11 @@ def build_message(title, since, until_label, results, failed, first_error, total
         lines.append(f"<b>{i}. {html.escape(cat['name'])}</b> ({len(arts)}건)")
         if not arts:
             lines.append("- 관련 기사 없음")
-        for a in arts:
+        for j, a in enumerate(arts, 1):
             t = html.escape(a["title"])
             url = html.escape(a["url"] or "", quote=True)
             lines.append(
-                f"• [{html.escape(a['kw'])}] <a href=\"{url}\">{t}</a>"
+                f"<b>{i}-{j}</b> [{html.escape(a['kw'])}] <a href=\"{url}\">{t}</a>"
                 f" - {html.escape(media_name(a['url']))} {a['pub']:%m/%d %H:%M}"
             )
             if SHOW_DESCRIPTION and a["desc"]:
@@ -436,6 +453,9 @@ def build_message(title, since, until_label, results, failed, first_error, total
     if failed:
         lines.append(f"⚠️ 수집 실패 검색어: {html.escape(', '.join(failed))}")
         lines.append(f"원인: {html.escape(first_error)}")
+        lines.append("")
+    lines.append("✏️ 보고용으로 정리하려면 번호를 보내 주세요. 예) 1-1*, 4-2*, 2-1, 3-3")
+    lines.append("   * 붙인 기사 = 눈에 띄는 뉴스 (없으면 앞의 3건)")
     return "\n".join(lines).strip()
 
 
@@ -468,17 +488,110 @@ def telegram(method, params):
     return body.get("result")
 
 
-def send_telegram(text, dry_run=False):
+def send_telegram(text, dry_run=False, plain=False):
     if dry_run:
         print(text)
         return
     for chunk in split_message(text):
-        telegram("sendMessage", {
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": chunk,
-            "parse_mode": "HTML",
-            "disable_web_page_preview": "true",
-        })
+        params = {"chat_id": TELEGRAM_CHAT_ID, "text": chunk, "disable_web_page_preview": "true"}
+        if not plain:
+            params["parse_mode"] = "HTML"
+        telegram("sendMessage", params)
+
+
+# ---------------------------------------------------------------------
+# 번호 목록 저장 / 보고용 정리
+# ---------------------------------------------------------------------
+def save_last_news(results):
+    items = {}
+    for i, (cat, arts) in enumerate(results, 1):
+        for j, a in enumerate(arts, 1):
+            items[f"{i}-{j}"] = {
+                "cat": cat["name"], "title": a["title"], "desc": a["desc"],
+                "url": a["url"], "naver": a["naver"], "pub": a["pub"].isoformat(),
+            }
+    with open(LAST_NEWS_FILE, "w", encoding="utf-8") as f:
+        json.dump({"saved": datetime.now(KST).isoformat(), "items": items}, f, ensure_ascii=False, indent=1)
+
+
+SELECTION_RE = re.compile(r"^\s*\d+\s*-\s*\d+\s*\*?(\s*[,，/·\s]\s*\d+\s*-\s*\d+\s*\*?)*\s*$")
+
+
+def parse_selection(text):
+    """'1-1*, 2-3 3-1' → [('1-1', True), ('2-3', False), ('3-1', False)]"""
+    picks = []
+    for m in re.finditer(r"(\d+)\s*-\s*(\d+)\s*(\*?)", text):
+        no = f"{int(m.group(1))}-{int(m.group(2))}"
+        if no not in [p[0] for p in picks]:
+            picks.append((no, bool(m.group(3))))
+    return picks
+
+
+def display_width(text):
+    return sum(2 if ord(c) > 0x2E80 else 1 for c in text)
+
+
+def article_link(it):
+    naver = it.get("naver") or ""
+    return naver if "naver.com" in naver else (it.get("url") or naver)
+
+
+def summary_line(it):
+    desc = re.sub(r"\s*(\.\.\.|…)\s*$", "", it.get("desc") or "").strip()
+    return desc or it["title"]
+
+
+def build_report(picks, items, now):
+    found = [(no, star, items[no]) for no, star in picks if no in items]
+    missing = [no for no, _ in picks if no not in items]
+    if not found:
+        return None, missing
+
+    stars = [f for f in found if f[1]]
+    highlights = stars if stars else found[:DEFAULT_HIGHLIGHTS]
+    hl_nos = {f[0] for f in highlights}
+    rest = [f for f in found if f[0] not in hl_nos]
+
+    def block(it):
+        return [f"☞{summary_line(it)}", "", f"원문: {it['title']}", article_link(it), ""]
+
+    lines = [
+        REPORT_TITLE.format(month=now.month, day=now.day), "",
+        REPORT_GREETING,
+        REPORT_INTRO.format(month=now.month, day=now.day), "",
+    ]
+    lines += [f"○ {it['title']}" for _, _, it in highlights]
+    lines += ["", "★ 눈에 띄는 뉴스 ★", ""]
+    for _, _, it in highlights:
+        lines += block(it)
+
+    # 나머지는 카테고리 순서대로 섹션을 나눠서
+    order = [REPORT_SECTIONS.get(c["name"], c["name"]) for c in CATEGORIES]
+    sections = {}
+    for _, _, it in rest:
+        sec = REPORT_SECTIONS.get(it["cat"], it["cat"])
+        sections.setdefault(sec, []).append(it)
+    for sec in sorted(sections, key=lambda x: order.index(x) if x in order else 99):
+        header = f"■ {sec}"
+        lines += ["", header + "-" * max(10, 50 - display_width(header)), ""]
+        for it in sections[sec]:
+            lines += block(it)
+    return "\n".join(lines).strip(), missing
+
+
+def run_selection(text):
+    if not os.path.exists(LAST_NEWS_FILE):
+        send_telegram("아직 저장된 뉴스 목록이 없어요. 먼저 '뉴스'라고 보내서 목록을 받아 주세요.")
+        return
+    with open(LAST_NEWS_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    report, missing = build_report(parse_selection(text), data.get("items", {}), datetime.now(KST))
+    if report is None:
+        send_telegram(f"목록에 없는 번호예요: {html.escape(', '.join(missing))}\n가장 최근에 받은 뉴스 목록의 번호로 보내 주세요.")
+        return
+    send_telegram(report, plain=True)  # 복사해서 바로 쓸 수 있게 서식 없이 보냄
+    if missing:
+        send_telegram(f"⚠️ 목록에 없어서 뺀 번호: {html.escape(', '.join(missing))}")
 
 
 # ---------------------------------------------------------------------
@@ -490,6 +603,7 @@ def run_daily(dry_run=False):
     results, failed, err, total = gather(since, until)
     msg = build_message("📰 데일리 뉴스 클리핑", since, fmt(until), results, failed, err, total)
     send_telegram(msg, dry_run)
+    save_last_news(results)
     print("정기 발송 완료")
 
 
@@ -499,6 +613,7 @@ def run_command(dry_run=False):
     results, failed, err, total = gather(since, until)
     msg = build_message("🔎 요청하신 뉴스", since, f"현재({fmt(until)})", results, failed, err, total)
     send_telegram(msg, dry_run)
+    save_last_news(results)
     print("요청 답장 완료")
 
 
@@ -514,6 +629,7 @@ def run_poll():
     telegram("getUpdates", {"offset": last_id + 1, "timeout": 0, "limit": 1})
 
     wants_news = wants_help = False
+    selection = None
     for u in updates:
         msg = u.get("message") or {}
         if str(msg.get("chat", {}).get("id")) != TELEGRAM_CHAT_ID:
@@ -521,15 +637,21 @@ def run_poll():
         text = (msg.get("text") or "").strip()
         if text in COMMAND_WORDS:
             wants_news = True
+        elif SELECTION_RE.match(text):
+            selection = text  # 여러 번 보냈으면 마지막 것
         elif text:
             wants_help = True
 
+    if selection:
+        run_selection(selection)
     if wants_news:
         send_telegram("🔎 뉴스를 모으고 있어요. 잠시만 기다려 주세요…")
         run_command()
-    elif wants_help:
-        send_telegram("'뉴스'라고 보내 주시면 전날 오후 5시부터 지금까지의 기사를 정리해 드려요.")
-    else:
+    elif wants_help and not selection:
+        send_telegram("• '뉴스' → 전날 오후 5시부터 지금까지의 기사 목록\n"
+                      "• 번호(예: 1-1*, 4-2, 2-1) → 마지막 목록에서 골라 보고용 양식으로 정리\n"
+                      "   * 붙인 기사는 '눈에 띄는 뉴스'로 올라가요")
+    elif not selection:
         print("처리할 메시지 없음")
 
 
