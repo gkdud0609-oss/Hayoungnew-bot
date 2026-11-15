@@ -11,7 +11,7 @@ on:
         description: "daily = 정기 발송 테스트 / command = '뉴스' 답장 테스트"
         default: daily
         type: choice
-        options: [daily, command]
+        options: [daily, command, poll]
 
 permissions:
   contents: write   # 마지막 뉴스 목록(last_news.json)을 저장하기 위해 필요
