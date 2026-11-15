@@ -27,6 +27,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Claude Code 미리 설치 (요약 속도 향상)
+        if: ${{ github.event.schedule == '*/5 * * * *' || inputs.mode == 'poll' }}
+        run: npm install -g @anthropic-ai/claude-code > /dev/null 2>&1 || true
+
       - name: 뉴스 수집 및 텔레그램 발송
         run: python3 news_bot.py
         env:
