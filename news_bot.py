@@ -141,6 +141,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LAST_NEWS_FILE = os.path.join(BASE_DIR, "last_news.json")
 # 마지막으로 보낸 보고용 정리본 (○ 줄 수정·피드백 반영 후 다시 보내기용)
 LAST_REPORT_FILE = os.path.join(BASE_DIR, "last_report.json")
+# 정기 발송을 언제까지 보냈는지 기록 (두 번 보내기 방지·놓친 발송 보내기)
+STATE_FILE = os.path.join(BASE_DIR, "bot_state.json")
+# 발송 시각을 이 시간(시간) 넘게 지나서 봇이 깨어나면 그 발송은 건너뜀
+DAILY_CATCHUP_HOURS = 6
 # 텔레그램으로 받은 요약 피드백 (다음 요약부터 바로 반영)
 FEEDBACK_FILE = os.path.join(BASE_DIR, "style_feedback.txt")
 
@@ -1047,6 +1051,20 @@ def run_feedback_admin(text):
 # ---------------------------------------------------------------------
 # 실행
 # ---------------------------------------------------------------------
+def load_state():
+    try:
+        with open(STATE_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def save_state(state):
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=1)
+    push_files(STATE_FILE, message="정기 발송 기록")
+
+
 def run_daily(dry_run=False):
     now = datetime.now(KST)
     since, until = daily_window(now)
@@ -1054,7 +1072,31 @@ def run_daily(dry_run=False):
     msg = build_message("📰 데일리 뉴스 클리핑", since, fmt(until), results, failed, err, total)
     save_last_news(results)
     send_telegram(msg, dry_run)
+    if not dry_run:
+        state = load_state()
+        state["last_daily_slot"] = until.isoformat()
+        save_state(state)
     print("정기 발송 완료")
+
+
+def daily_due(now):
+    """지금 보내야 할 정기 발송이 있으면 True (발송 시각이 지났고, 아직 안 보냈고, 너무 오래되지 않음)"""
+    latest = send_slots(now)[0]
+    if now - latest > timedelta(hours=DAILY_CATCHUP_HOURS):
+        return False
+    last = load_state().get("last_daily_slot")
+    return not last or datetime.fromisoformat(last) < latest
+
+
+def maybe_send_daily():
+    now = datetime.now(KST)
+    if not daily_due(now):
+        return
+    pull_last_news()               # 다른 실행이 이미 보냈는지 최신 기록 확인
+    if not daily_due(now):
+        return
+    print("정기 발송 시각 → 발송합니다")
+    run_daily()
 
 
 DATE_TOKEN_RE = re.compile(
@@ -1335,6 +1377,17 @@ def run_poll():
     offset = None
     print(f"{LISTEN_MINUTES}분 동안 텔레그램 메시지를 기다립니다")
     while True:
+        try:
+            maybe_send_daily()     # 오후 5시(일요일 2시)가 되면 깨어 있는 봇이 바로 정기 발송
+        except Exception as e:
+            print(f"[정기 발송 실패] {e}", file=sys.stderr)
+            try:
+                send_telegram(html.escape(f"⚠️ 정기 뉴스 발송 중 오류가 났어요: {str(e)[:150]}"))
+            except Exception:
+                pass
+            state = load_state()   # 같은 오류로 계속 재시도하지 않도록 이번 발송은 건너뜀
+            state["last_daily_slot"] = send_slots(datetime.now(KST))[0].isoformat()
+            save_state(state)
         remaining = int(deadline - time.time())
         if remaining <= 5:
             break
