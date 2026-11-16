@@ -1,15 +1,167 @@
 {
- "saved": "2026-11-16T01:21:49.197862+09:00",
+ "saved": "2026-11-16T17:22:07.226262+09:00",
  "items": {
+  "1-1": {
+   "cat": "자사뉴스",
+   "title": "[뉴스 TOP5] 금융권망분리·케이뱅크·대동로보틱스",
+   "desc": "◇대동로보틱스 대표이사 잔혹사…2년새 네 번째 교체 대동그룹의 로봇 전문 자회사 대동로보틱스가 출범 약 2년 만에 네 번째 대표이사로 공공부문 협력에 관여해 온 나영중 그룹경영실장(부사장)을 내정했다. 앞서...",
+   "url": "https://news.dealsitetv.com/articles/178665",
+   "naver": "https://news.dealsitetv.com/articles/178665",
+   "pub": "2026-11-16T16:10:00+09:00"
+  },
+  "1-2": {
+   "cat": "자사뉴스",
+   "title": "대동 RT100, 건설현장에서도 활용 가능성 '확인'",
+   "desc": "대동로보틱스의 자율주행 운반로봇 RT100의 건설로봇 사업화 가능성을 확인했다. 대동로보틱스와 GS건설은 지난 12일 RT100의 건설 현장 적용을 위한 기술 실증(PoC)을 완료했다고 밝혔다. 양사는 지난 6월 '건설현장 자동화...",
+   "url": "https://www.aflnews.co.kr/news/articleView.html?idxno=331787",
+   "naver": "https://www.aflnews.co.kr/news/articleView.html?idxno=331787",
+   "pub": "2026-11-16T11:34:00+09:00"
+  },
+  "1-3": {
+   "cat": "자사뉴스",
+   "title": "대동, 3분기 영업손실 393억…순손실 733억",
+   "desc": "대구 농기계업체 대동이 3분기 대규모 영업적자를 내면서 올해(2026년) 누적 수익성이 크게 악화됐습니다. 금융감독원 전자공시에 따르면 3분기 연결 매출은 3천524억 원으로 지난해와 비슷했지만 영업손실 393억...",
+   "url": "https://www.tbc.co.kr/news/view?pno=20261116092645AE08590&id=213393",
+   "naver": "https://www.tbc.co.kr/news/view?pno=20261116092645AE08590&id=213393",
+   "pub": "2026-11-16T10:32:00+09:00"
+  },
+  "1-4": {
+   "cat": "자사뉴스",
+   "title": "대동로보틱스, 대표이사 잔혹사…2년새 네 번째 수장",
+   "desc": "강성철 대표 취임 1년도 안 돼 역할 조정…나영중 부사장 그룹경영실장 겸임 예정 대동그룹의 로봇 전문 자회사 대동로보틱스가 출범 약 2년 만에 네 번째 대표이사를 맞는다. 화려한 연구개발(R&D) 이력을 앞세운 로봇계...",
+   "url": "https://dealsite.co.kr/articles/172389",
+   "naver": "https://dealsite.co.kr/articles/172389",
+   "pub": "2026-11-16T07:02:00+09:00"
+  },
+  "1-5": {
+   "cat": "자사뉴스",
+   "title": "“칼 맞았다” 김진표, 과거 흉기 피습 충격 고백…경호원까지 대동",
+   "desc": "그룹 패닉의 김진표가 과거 강도를 당해 흉기에 찔렸던 아찔한 경험을 고백했다. 15일 유튜브 채널 ‘요정재형’에는 패닉 멤버 이적과 김진표가 출연한 영상이 공개됐다. 이날 정재형은 오랜만에 예능 프로그램에 출연한...",
+   "url": "https://sports.donga.com/ent/article/all/20261115/135028987/1",
+   "naver": "https://m.entertain.naver.com/article/382/0001304922",
+   "pub": "2026-11-16T06:36:00+09:00"
+  },
+  "2-1": {
+   "cat": "경쟁사",
+   "title": "TYM 흑자 VS 대동 적자…북미 한파 속 드러난 수익성 격차",
+   "desc": "올해 3분기 대동(000490)은 393억원의 영업손실을 기록한 반면 TYM(002900)은 358억원의 영업이익을 내면서... TYM은 올해 3분기 매출 2601억원과 영업이익 358억원을 달성했습니다. 전년 동기 대비 각각 16.0%와 124.7...",
+   "url": "http://www.newstomato.com/ReadNews.aspx?no=1320580&inflow=N",
+   "naver": "http://www.newstomato.com/ReadNews.aspx?no=1320580&inflow=N",
+   "pub": "2026-11-16T15:20:00+09:00"
+  },
+  "2-2": {
+   "cat": "경쟁사",
+   "title": "무인 장비가 분뇨 퍼 담아 청소 뚝딱… 두산밥캣, 자율작업 성공",
+   "desc": "두산밥캣은 AI 솔루션 기업 마음AI와 추진한 건설기계 자율작업 기술 현장 실증에 성공했다고 16일 밝혔다. 올해 6월 마음AI와 업무협약(MOU)을 체결하고 5개월 만에 소형 장비가 작업 환경에서 자율적으로 작업하는 기술을...",
+   "url": "https://www.hankookilbo.com/news/article/A2026111611270004973?did=NA",
+   "naver": "https://n.news.naver.com/mnews/article/469/0000965810?sid=101",
+   "pub": "2026-11-16T14:09:00+09:00"
+  },
+  "2-3": {
+   "cat": "경쟁사",
+   "title": "마음AI-두산밥캣, 축사서 건설장비 자율작업 실증…피지컬 AI 적용 나서",
+   "desc": "마음AI가 두산밥캣과 업무협약(MOU)을 체결한 지 약 5개월 만에 실제 축사에서 건설장비의 자율작업 실증에 성공했다고 16일 밝혔다. 실증은 경기도 평택의 소 축사에서 두산밥캣의 소형 건설장비인 스키드 로더를...",
+   "url": "https://www.epnc.co.kr/news/articleView.html?idxno=409840",
+   "naver": "https://www.epnc.co.kr/news/articleView.html?idxno=409840",
+   "pub": "2026-11-16T13:56:00+09:00"
+  },
+  "2-4": {
+   "cat": "경쟁사",
+   "title": "[산업 Pick] 두산에너빌리티·한화파워·두산밥캣, 발전설비 AI 정비와 F...",
+   "desc": "라이센스뉴스 = 박창배 기자 | 두산에너빌리티·한화파워·두산밥캣이 인공지능(AI)을 접목한 발전설비 예방정비 기술 공유, 글로벌 액화천연가스(LNG) 공급망 재편에 발맞춘 부유식 설비 개조 수주,  피지컬 AI 기반...",
+   "url": "https://www.lcnews.co.kr/news/articleView.html?idxno=211411",
+   "naver": "https://www.lcnews.co.kr/news/articleView.html?idxno=211411",
+   "pub": "2026-11-16T13:30:00+09:00"
+  },
+  "2-5": {
+   "cat": "경쟁사",
+   "title": "[더벨][i-point] 마음AI, 두산밥캣과 피지컬AI 협력 결실",
+   "desc": "피지컬 인공지능(AI) 기업 마음AI는 두산밥캣과 협력해 건설장비의 자율작업 실증에 성공했다고 16일 밝혔다. 지난 6월 업무협약(MOU)을 체결한 지 약 5개월 만이다. 실제 산업현장에서 주변 환경을 인식하고 작업 경로와...",
+   "url": "https://www.thebell.co.kr/free/content/ArticleView.asp?key=202611161011051840107878",
+   "naver": "https://www.thebell.co.kr/free/content/ArticleView.asp?key=202611161011051840107878",
+   "pub": "2026-11-16T13:18:00+09:00"
+  },
+  "2-6": {
+   "cat": "경쟁사",
+   "title": "두산밥캣, 마음AI와 건설장비 자율작업 기술 현장 실증 성공",
+   "desc": "두산밥캣이 건설장비 자율작업 기술 현장 실증에 성공했다. 두산밥캣은 AI 솔루션 기업 마음AI와 추진한 건설장비 자율작업 기술의 현장 실증에 성공했다고 16일 밝혔다. 두산밥캣은 세계적인 소형 건설기계, 산업차량...",
+   "url": "https://www.cnbnews.com/news/articleView.html?idxno=1023870",
+   "naver": "https://www.cnbnews.com/news/articleView.html?idxno=1023870",
+   "pub": "2026-11-16T10:42:00+09:00"
+  },
+  "2-7": {
+   "cat": "경쟁사",
+   "title": "두산밥캣 굴착기 대신 AI가 '척척'…운전자 없이 축사 분뇨까지 치웠다",
+   "desc": "두산밥캣이 인공지능(AI)을 활용해 건설장비가 운전자 없이 작업하는 기술을 현장에서 구현했다. 축사 분뇨 처리 실증을 시작으로 농업과 건설 등 다양한 산업 현장에 무인화 기술을 확대할 계획이다. 회사는 AI 전문기업...",
+   "url": "https://www.megaeconomy.co.kr/news/newsview.php?ncode=1065574985781800",
+   "naver": "https://www.megaeconomy.co.kr/news/newsview.php?ncode=1065574985781800",
+   "pub": "2026-11-16T10:20:00+09:00"
+  },
+  "2-8": {
+   "cat": "경쟁사",
+   "title": "축사 분뇨 처리도 알아서 척척…두산밥캣, 무인 건설장비 실증 성공",
+   "desc": "두산밥캣이 인공지능(AI)을 접목한 소형 건설장비로 운전자 없이 축사 분뇨를 운반하고 청소하는 자율작업 기술을 구현했다. 이를 바탕으로 인력난이 심각한 산업현장의 반복·기피 작업을 자동화하는 솔루션 개발에...",
+   "url": "https://www.ddaily.co.kr/page/view/2026111609372351091",
+   "naver": "https://n.news.naver.com/mnews/article/138/0002248667?sid=101",
+   "pub": "2026-11-16T10:02:00+09:00"
+  },
+  "2-9": {
+   "cat": "경쟁사",
+   "title": "스스로 축사 청소·분뇨 운반… 두산밥캣, 건설기계 자율 주행 실증",
+   "desc": "마음AI와 협력… 시각행동모델(VLA) 적용 16일 두산밥캣이 경기 평택의 축사에서 진행한 소형 장비 스키드 로더(Skid Loader)의 자율 주행 기술 타당성 검증을 마쳤다고 밝혔다. 두산밥캣은 지난 6월 마음AI와 이번 자율 주행...",
+   "url": "https://biz.chosun.com/industry/company/2026/11/16/K5J4F65GDFCFPAADMIB3BU72WY/?utm_source=naver&utm_medium=original&utm_campaign=biz",
+   "naver": "https://n.news.naver.com/mnews/article/366/0001204993?sid=101",
+   "pub": "2026-11-16T09:59:00+09:00"
+  },
+  "2-10": {
+   "cat": "경쟁사",
+   "title": "두산밥캣, 운전자 없는 자율작업 장비 시연 성공…무인화 속도",
+   "desc": "두산밥캣이 인공지능(AI) 솔루션 기업 마음AI와 협업해 소형 건설장비의 무인 자율작업 현장 실증에 성공했다. 두산밥캣은 마음AI와 지난 6월 초 양해각서(MOU)를 체결하고 기술 타당성을 검증한 지 약 5개월 만에 실제 산업...",
+   "url": "http://www.newsdream.kr/news/articleView.html?idxno=122196",
+   "naver": "http://www.newsdream.kr/news/articleView.html?idxno=122196",
+   "pub": "2026-11-16T09:46:00+09:00"
+  },
   "3-1": {
    "cat": "시장 동향",
-   "title": "농협 강원본부 농기계 순회수리 봉사",
-   "desc": "",
-   "url": "https://www.kado.net/news/articleView.html?idxno=2084975",
-   "naver": "https://n.news.naver.com/mnews/article/654/0000211421?sid=101",
-   "pub": "2026-11-16T00:09:00+09:00"
+   "title": "진천군 '전국 농기계 임대 사업 평가' 우수기관 표창",
+   "desc": "주관한 '전국 농기계 임대 사업 평가'에서 전국 최상위 5개 시군에만 수여되는 우수기관 표창을 수상하며 탁월한 농업 행정 역량을 대외적으로 입증했다. 이번 평가는 전국 148개 시군에서 운영 중인 475개 농기계임대사업소...",
+   "url": "https://www.ccdn.co.kr/news/articleView.html?idxno=1111381",
+   "naver": "https://www.ccdn.co.kr/news/articleView.html?idxno=1111381",
+   "pub": "2026-11-16T16:02:00+09:00"
   },
   "3-2": {
+   "cat": "시장 동향",
+   "title": "농협강원본부, 하반기 농기계 순회수리 봉사활동 실시",
+   "desc": "농협강원본부(본부장 김병용)와 강원농협농기계기술자연합회(회장 김봉규)는 지난 13일 화천농협(조합장 김명규)에서 '2026년 하반기 강원농협 농기계 순회수리 봉사활동'을 실시했다. 이번 봉사활동에는 강원농협...",
+   "url": "https://www.aflnews.co.kr/news/articleView.html?idxno=331794",
+   "naver": "https://www.aflnews.co.kr/news/articleView.html?idxno=331794",
+   "pub": "2026-11-16T15:38:00+09:00"
+  },
+  "3-3": {
+   "cat": "시장 동향",
+   "title": "담양군, 농기계 안전사고 예방 위한 교통안전교육… 수확철 안전수칙 안...",
+   "desc": "담양군(군수 박종원)은 지난 12일 담빛농업관에서 농기계임대사업소 회원과 교육을 희망하는 농업인을 대상으로 농기계 교통안전교육을 실시했다. 이번 교육은 농기계 사용이 늘어나는 가을 수확철을 맞아 농업인에게...",
+   "url": "https://www.aflnews.co.kr/news/articleView.html?idxno=331734",
+   "naver": "https://www.aflnews.co.kr/news/articleView.html?idxno=331734",
+   "pub": "2026-11-16T10:34:00+09:00"
+  },
+  "3-4": {
+   "cat": "시장 동향",
+   "title": "충남대학교 김용주 교수팀, 수소연료전지 기반 무인트랙터 공개…친환...",
+   "desc": "무인트랙터를 공개하며 미래 농업기계 기술의 발전 가능성을 제시했다. 충남대학교 농업생명과학대학... 무인트랙터를 선보였다. 이번 전시 기술은 농림축산식품부 연구개발(R&D) 과제인 '친환경 수소연료전지 기반...",
+   "url": "https://www.lecturernews.com/news/articleView.html?idxno=213812",
+   "naver": "https://www.lecturernews.com/news/articleView.html?idxno=213812",
+   "pub": "2026-11-16T09:36:00+09:00"
+  },
+  "3-5": {
+   "cat": "시장 동향",
+   "title": "이천시, 11월 16일부터 농기계 폐유 무상 수거…연간 40리터까지",
+   "desc": "이천시 농기계임대사업소 관계자들이 농기계 폐유를 전용 저장용기에 수거하고 있다. 사진/이천시 이천시가 오는 11월 16일부터 농기계 폐유를 무상으로 수거한다. 농업인의 처리 부담과 환경오염을 줄이려는 조치로...",
+   "url": "https://www.gukjenews.com/news/articleView.html?idxno=3752718",
+   "naver": "https://www.gukjenews.com/news/articleView.html?idxno=3752718",
+   "pub": "2026-11-16T09:10:00+09:00"
+  },
+  "3-6": {
    "cat": "시장 동향",
    "title": "송옥란 이천시의원, 농기계 폐유 무상 수거 제도화",
    "desc": "이천시가 11월 16일부터 농기계 폐유를 무상으로 수거한다. 이번 사업은 송옥란 이천시의원이 대표발의한... 수거는 장호원, 모가, 신둔 농기계임대사업소 3곳에서 진행된다. 수거된 폐유는 전문업체에 위탁해 처리된다....",
@@ -17,7 +169,7 @@
    "naver": "https://www.webeconomy.co.kr/news/articleView.html?idxno=2375922",
    "pub": "2026-11-15T22:38:00+09:00"
   },
-  "3-3": {
+  "3-7": {
    "cat": "시장 동향",
    "title": "자율주행·AI 미래 농업지도 바꾼다(7) 초고가 농기계, '사는 시대'에서...",
    "desc": "［동양일보 유환권］ 강원도 강릉시 농민들이 농기계 공유임대센터 '우리두레'에서 임대해 준 장비로... ◇ 정부, AI 농기계 공유센터 15곳 추진 농림축산식품부의 2027년도 예산안에는 농업 피지컬 AI 실증·확산 사업...",
@@ -25,7 +177,7 @@
    "naver": "https://www.dynews.co.kr/news/articleView.html?idxno=874017",
    "pub": "2026-11-15T19:34:00+09:00"
   },
-  "3-4": {
+  "3-8": {
    "cat": "시장 동향",
    "title": "\"농기계 폐유, 그냥 버리지 마세요\"…이천시, 16일부터 무상수거 서비스",
    "desc": "농기계 오일을 교환한 뒤 남은 폐유를 어디에 처리해야 할지 막막했던 경기 이천지역 농업인들에게 실질적인 지원의 길이 열렸다.이천시는 송옥란 이천시의원이 대표발의한 전국 최초의 관련 조례를 기반으로 농기계...",
@@ -33,181 +185,333 @@
    "naver": "https://www.asiatoday.co.kr/kn/view.php?key=20261115010005526",
    "pub": "2026-11-15T17:52:00+09:00"
   },
+  "3-9": {
+   "cat": "시장 동향",
+   "title": "JB기술지주·한국건설기계연구원, 공공기술 사업화 업무협약 체결",
+   "desc": "JB기술지주회사(대표이사 이영춘, 이하 'JB기술지주')는 한국건설기계연구원(원장 김정대)과 우수 공공기술의 기술이전 및 투자 협력 연계를 위한 업무협약(MOU)을 체결했다. JB기술지주회사(대표이사 이영춘, 이하...",
+   "url": "http://www.domin.co.kr/news/articleView.html?idxno=1575709",
+   "naver": "http://www.domin.co.kr/news/articleView.html?idxno=1575709",
+   "pub": "2026-11-16T16:38:00+09:00"
+  },
   "4-1": {
    "cat": "스마트농업&기후위기",
-   "title": "김해 영재교육원 17개 학급, 스마트팜부터 창작 뮤지컬까지 선보여",
-   "desc": "'데이터로 설계하는 스마트 편의점'과 '미세 플라스틱 문제 해결을 위한 친환경 식기 탐구'를 비롯해 생성형 AI를 활용한 창작물과 피지컬 컴퓨팅 기반 스마트팜도 선보였다. 발표에서는 완성한 결과물과 함께 어떤...",
-   "url": "http://www.newstown.co.kr/news/articleView.html?idxno=721959",
-   "naver": "http://www.newstown.co.kr/news/articleView.html?idxno=721959",
-   "pub": "2026-11-15T23:02:00+09:00"
+   "title": "경남도, 딸기 스마트팜 2030년까지 200ha로… 중소농 보급형 모델 개발",
+   "desc": "경남도가 단동형 비닐온실 중심의 중소규모 딸기 농가에 적합한 스마트팜 모델 개발에 나섰다. 경남농업기술원은 중소규모 딸기 농가의 시설 여건과 재배 특성을 반영한 '경남형 중소규모 딸기 스마트팜 보급형 모델...",
+   "url": "https://www.youngnong.co.kr/news/articleView.html?idxno=71873",
+   "naver": "https://www.youngnong.co.kr/news/articleView.html?idxno=71873",
+   "pub": "2026-11-16T16:26:00+09:00"
   },
   "4-2": {
    "cat": "스마트농업&기후위기",
-   "title": "안동시, 스마트농업 확산·원예특작 산업 육성 성과",
-   "desc": "이번 평가는 도내 시·군의 농정 추진 성과를 종합적으로 평가하기 위해 마련됐으며, 농업대전환 가속화와 농업유통 및 농식품 혁신, 스마트농업 확산, 축산정책 및 동물방역 등 8개 분야 29개 지표를 기준으로 진행됐다....",
-   "url": "https://www.hidomin.com/news/articleView.html?idxno=729486",
-   "naver": "https://www.hidomin.com/news/articleView.html?idxno=729486",
-   "pub": "2026-11-15T21:08:00+09:00"
+   "title": "그린플러스, 3분기 누적 매출 1050억원...\"스마트팜이 성장 견인\"",
+   "desc": "스마트팜 시공 물량 확대와 알루미늄 사업의 수요 증가가 동시에 반영되면서 외형 성장과 수익성 개선이 이어졌습니다. 스마트팜 사업은 올해 창사 이래 가장 많은 프로젝트를 진행하면서 실적 성장을 주도했습니다....",
+   "url": "http://www.paxetv.com/news/articleView.html?idxno=287077",
+   "naver": "http://www.paxetv.com/news/articleView.html?idxno=287077",
+   "pub": "2026-11-16T16:08:00+09:00"
   },
   "4-3": {
    "cat": "스마트농업&기후위기",
-   "title": "고된 감귤 농사, 스마트팜으로 자동화·기계화",
-   "desc": "스마트농업 기술이 노동력을 줄이고 생산성은 높이는 효과를 내고 있습니다. 권현 기자입니다. 【기자】... 노지감귤 스마트팜은 우선 과수원 구조를 바꿨습니다. 기계 작업을 할 수 있도록 작업로를 확보했습니다....",
-   "url": "https://www.obsnews.co.kr/news/articleView.html?idxno=1543824",
-   "naver": "https://www.obsnews.co.kr/news/articleView.html?idxno=1543824",
-   "pub": "2026-11-15T20:10:00+09:00"
+   "title": "천안제일고, 네덜란드 첨단 스마트팜 기술 교실로…미래 농업인재 육성",
+   "desc": "충남 천안제일고등학교가 세계적인 스마트농업 선진국인 네덜란드의 전문가를 초청해 인공지능(AI) 기반 첨단 농업기술과 지식재산권 활용 사례를 공유하며 미래 농업인재 육성에 나섰다. 특히 교내 스마트팜 교육시설을...",
+   "url": "https://www.ccdn.co.kr/news/articleView.html?idxno=1111389",
+   "naver": "https://www.ccdn.co.kr/news/articleView.html?idxno=1111389",
+   "pub": "2026-11-16T16:02:00+09:00"
+  },
+  "4-4": {
+   "cat": "스마트농업&기후위기",
+   "title": "그린플러스, 스마트팜 시공 확대에 성장세…방산·반도체 소재 공급도 ...",
+   "desc": "그린플러스가 스마트팜 시공 사업 확대와 방산·반도체용 알루미늄 소재 공급 증가에 힘입어 성장세를 이어가고 있다. 올해 역대 최대 규모의 스마트팜 시공 물량을 확보한 가운데 주요 프로젝트의 공정 진행에 따라...",
+   "url": "https://www.viva100.com/article/20261116501133",
+   "naver": "https://www.viva100.com/article/20261116501133",
+   "pub": "2026-11-16T15:48:00+09:00"
+  },
+  "4-5": {
+   "cat": "스마트농업&기후위기",
+   "title": "혜전대-태안군, 스마트팜·치유농업 육성 맞손…전문인력 양성 협력",
+   "desc": "혜전대학교와 태안군이 스마트팜 기술 연구와 농특산물 고부가가치화, 치유농업 전문인력 양성을 위한... ◆ 스마트팜·6차 산업·치유농업 협력 확대 혜전대는 16일 태안군청에서 태안군과 지역 농업 혁신 및 미래...",
+   "url": "https://www.newstnt.com/news/articleView.html?idxno=728648",
+   "naver": "https://www.newstnt.com/news/articleView.html?idxno=728648",
+   "pub": "2026-11-16T15:32:00+09:00"
+  },
+  "4-6": {
+   "cat": "스마트농업&기후위기",
+   "title": "남원시, '청년창업 스마트팜 패키지' 4곳 선정…사업비 17억 원 확보",
+   "desc": "청년창업 스마트팜 패키지 지원사업' 공모에서 최종 4개소가 선정돼 총 17억 원의 사업비를 확보했다고 16일 밝혔다. 이번 사업은 영농 기반이 부족한 청년 농업인들이 스마트농업에 안정적으로 진입할 수 있도록 온실...",
+   "url": "https://www.thefairnews.co.kr/news/articleView.html?idxno=94375",
+   "naver": "https://www.thefairnews.co.kr/news/articleView.html?idxno=94375",
+   "pub": "2026-11-16T15:16:00+09:00"
+  },
+  "4-7": {
+   "cat": "스마트농업&기후위기",
+   "title": "완주군, 과수 스마트팜 기반 구축…기후변화 대응 농업 경쟁력 강화",
+   "desc": "현장에 스마트농업 기술을 보급하고 데이터 기반 정밀농업 확산에 나섰다고 16일 밝혔다. 완주군농업기술센터는 농촌진흥청 신기술 보급 사업의 하나로 추진한 '2026년 정밀농업 구현 과수 스마트팜 기반조성...",
+   "url": "https://www.newspim.com/news/view/20261116000918",
+   "naver": "https://www.newspim.com/news/view/20261116000918",
+   "pub": "2026-11-16T15:09:00+09:00"
+  },
+  "4-8": {
+   "cat": "스마트농업&기후위기",
+   "title": "기후위기 인천비상행동 \"기업 특혜 초광역특구법 철회\" 촉구",
+   "desc": "기후위기인천비상행동은 15일 성명을 내고 \"초광역특구법이 지역균형발전과 탄소중립을 내세우지만 기업의 투자와 개발을 위한 광범위한 특례가 있다\"고 밝혔다. 기후위기비상행동은 2019년 9월 전국적인 대규모...",
+   "url": "https://www.incheontoday.com/news/articleView.html?idxno=326410",
+   "naver": "https://www.incheontoday.com/news/articleView.html?idxno=326410",
+   "pub": "2026-11-16T14:32:00+09:00"
+  },
+  "4-9": {
+   "cat": "스마트농업&기후위기",
+   "title": "금산군, 왕초보 스마트팜 성황",
+   "desc": "참여한 '왕초보 스마트팜 도전 과정'을 성황리에 마무리했다고 밝혔다. 이번 교육은 시설원예 농업인의 성공적인 스마트팜 전환을 지원하고, 스마트농업 입문자들이 관련 기술을 쉽게 이해해 실제 영농 현장에 접목할 수...",
+   "url": "https://www.ccdn.co.kr/news/articleView.html?idxno=1111275",
+   "naver": "https://www.ccdn.co.kr/news/articleView.html?idxno=1111275",
+   "pub": "2026-11-16T14:20:00+09:00"
+  },
+  "4-10": {
+   "cat": "스마트농업&기후위기",
+   "title": "상주시, 스마트팜 혁신밸리 병해충 예방 강화",
+   "desc": "상주시는 지난 11일 상주 스마트팜 혁신밸리 내 주요 외부 시설을 대상으로 병해충 유입 및 확산 방지를 위한 소독·방역을 실시했다. 이번 방역은 스마트팜 혁신밸리의 안정적인 운영과 입주 농가의 재배환경 보호를...",
+   "url": "https://www.kbsm.net/news/view.php?idx=541902",
+   "naver": "https://www.kbsm.net/news/view.php?idx=541902",
+   "pub": "2026-11-16T13:36:00+09:00"
+  },
+  "5-1": {
+   "cat": "농업정책",
+   "title": "농식품부·aT, '농부가바로팜' 겨울 기획전 진행…국산 농산물 20% 할인",
+   "desc": "농식품부와 aT는 '2026년 농산물 온라인 마케터 육성 지원사업'의 일환으로 이번 기획전을 추진하고 있다. 해당 사업은 온라인 판매에 어려움을 겪는 농가에 교육과 컨설팅, 기획전 참여 등을 지원하는 것으로, 올해 323개...",
+   "url": "https://www.nongup.net/news/articleView.html?idxno=34030",
+   "naver": "https://www.nongup.net/news/articleView.html?idxno=34030",
+   "pub": "2026-11-16T16:20:00+09:00"
+  },
+  "5-2": {
+   "cat": "농업정책",
+   "title": "배상민 국순당 대표, 농식품부 장관상 수상…우리술 산업 발전 공로",
+   "desc": "배상민 국순당 대표가 지난 13일 서울 양재동 aT센터에서 열린 '2026 대한민국 우리술 대축제'에서 농림축산식품부 장관상을 받았다. 권상민 국순당 경영혁신본부장(중앙 오른쪽)이 대리 수상한 후 기념 촬영을 하고 있다....",
+   "url": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=504616",
+   "naver": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=504616",
+   "pub": "2026-11-16T15:40:00+09:00"
+  },
+  "5-3": {
+   "cat": "농업정책",
+   "title": "발효식품 연구로 농식품부장관상 받은 어린이집 원장",
+   "desc": "▲  김경자 원장은 지난 10월 18일 열린 ‘2026 대한민국치유식품대전’에서 농림축산식품부장관상 대상과 한국치유식품협회장상 대상, 음식예술작가 예비등단증서를 받았다. ⓒ 화순저널 평생 아이들을 돌보던...",
+   "url": "https://www.ohmynews.com/NWS_Web/View/at_pg.aspx?CNTN_CD=A0003285315&CMPT_CD=P0010&utm_source=naver&utm_medium=newsearch&utm_campaign=naver_news",
+   "naver": "https://n.news.naver.com/mnews/article/047/0002535976?sid=102",
+   "pub": "2026-11-16T14:42:00+09:00"
+  },
+  "5-4": {
+   "cat": "농업정책",
+   "title": "경북도·농식품부, 농지 특별조치법안 설명회…농지 이용 규제 완화 논...",
+   "desc": "농식품부는 설명회를 통해 수렴한 내용을 국회 법안 심의 과정에 전달해 제도의 현장 수용성과 실효성을 높일 계획이다. 현재 특별조치법안은 발의 단계로, 농지 관련 규제 완화와 각종 특례는 향후 국회 심의 및 입법...",
+   "url": "https://www.shinailbo.co.kr/news/articleView.html?idxno=5083880",
+   "naver": "https://www.shinailbo.co.kr/news/articleView.html?idxno=5083880",
+   "pub": "2026-11-16T14:40:00+09:00"
+  },
+  "5-5": {
+   "cat": "농업정책",
+   "title": "국순당 배상민 대표, 전통주 산업 기여 공로로 농식품부 장관상",
+   "desc": "국순당 배상민 대표가 전통주 산업 발전에 기여한 공로를 인정받아 농림축산식품부 장관상을 수상했다고 16일 밝혔다. 배상민 대표는 우리술 수출 확대와 전통주 산업 활성화 활동을 이어온 점을 인정받아 13일 열린...",
+   "url": "https://www.lawissue.co.kr/view.php?ud=202611161432048357204ead0791_12",
+   "naver": "https://www.lawissue.co.kr/view.php?ud=202611161432048357204ead0791_12",
+   "pub": "2026-11-16T14:34:00+09:00"
+  },
+  "5-6": {
+   "cat": "농업정책",
+   "title": "[서산소식]달래 생산 기계화, 농진청 공모에 선정 등",
+   "desc": "충남 서산 특화작물 달래 생산성 더 높아질 전망이다. 16일 서산시는 농촌진흥청 주관 '기술보급 블렌딩 협력모델 공모사업'에 서산 달래가 선정돼 총 사업비 10억원을 확보했다고 밝혔다. 시는 이 사업비로 내년부터...",
+   "url": "https://www.newsis.com/view/NISX20261116_0003869797",
+   "naver": "https://n.news.naver.com/mnews/article/003/0014324795?sid=102",
+   "pub": "2026-11-16T14:07:00+09:00"
+  },
+  "5-7": {
+   "cat": "농업정책",
+   "title": "[푸드테크정책포럼] 송미령 농식품부 장관 \"정책적 기반 통해 푸드테크...",
+   "desc": "아시아투데이 정영록 기자 = 송미령 농림축산식품부 장관은 16일 \"정책적 기반을 토대로 기업들이 체감할 수 있는 푸드테크 분야의 실질적 성과를 만들어 나가야 할 것\"이라고 밝혔다.송 장관은 이날 오후 서울 여의도...",
+   "url": "https://www.asiatoday.co.kr/kn/view.php?key=20261116010005719",
+   "naver": "https://www.asiatoday.co.kr/kn/view.php?key=20261116010005719",
+   "pub": "2026-11-16T14:02:00+09:00"
+  },
+  "5-8": {
+   "cat": "농업정책",
+   "title": "농진청, 닭·달걀 무게 관련 유전마커 10종 발굴",
+   "desc": "매일일보 = 전승완 기자  |  농촌진흥청 국립축산과학원은 닭의 몸무게와 관련된 유전마커 10종을 발굴하고, 이 가운데 일부는 달걀 무게와도 관련이 있음을 확인했다고 16일 밝혔다. 닭을 개량할 때는 몸무게와 달걀 무게...",
+   "url": "https://www.m-i.kr/news/articleView.html?idxno=2018933",
+   "naver": "https://www.m-i.kr/news/articleView.html?idxno=2018933",
+   "pub": "2026-11-16T14:00:00+09:00"
+  },
+  "5-9": {
+   "cat": "농업정책",
+   "title": "\"환기하고, 틈새 막고\"…농진청, 겨울철 축사 관리 당부",
+   "desc": "농진청은 겨울철 축사 관리 요령으로 ▲ 입기구 덮개 각도 조절 ▲ 미사용 입기구·환기팬 보온재 설치 ▲ 벽·천장·출입문 틈새 보수 및 손상 단열재 정비 ▲ 개방형 축사 윈치커튼 조절 및 사일리지 방풍벽 설치 등을...",
+   "url": "https://www.yna.co.kr/view/AKR20261116099200055?input=1195m",
+   "naver": "https://n.news.naver.com/mnews/article/001/0016443966?sid=101",
+   "pub": "2026-11-16T13:51:00+09:00"
+  },
+  "5-10": {
+   "cat": "농업정책",
+   "title": "농식품부·농정원, 필리핀 농업행정플랫폼 공식 이양…내년 전국 확대 ...",
+   "desc": "필리핀 농업부의 요청으로 추진된 이번 사업은 농식품부 공적개발원조(ODA)를 통해 2023년부터 4년간... 행사에는 한국측에서 박상호 농식품부 국제농식품협력관, 윤동진 농정원장, 필리핀측에서 알란 우말리(Allan...",
+   "url": "https://www.aflnews.co.kr/news/articleView.html?idxno=331801",
+   "naver": "https://www.aflnews.co.kr/news/articleView.html?idxno=331801",
+   "pub": "2026-11-16T13:28:00+09:00"
   },
   "6-1": {
    "cat": "로봇&모빌리티",
-   "title": "울산 남구·중소기업협의회 대표단, 상하이 로봇 실증 훈련기지 벤치마...",
-   "desc": "상하이 '휴머노이드 로봇 기린(Kylin, 麒麟) 트레이닝 그라운드'를 방문했다. 자매도시 염성시 방문과 상하이 전자 박람회(CEF) 참관에 이은 일정으로, 산업 현장에 급속도로 도입 중인 피지컬 AI(Physical AI)와 인간형 로봇...",
-   "url": "https://www.ulsanpress.net/news/articleView.html?idxno=586883",
-   "naver": "https://www.ulsanpress.net/news/articleView.html?idxno=586883",
-   "pub": "2026-11-15T21:43:00+09:00"
+   "title": "LG전자, 로봇산업진흥원과 휴머노이드 안전·품질 강화 협력",
+   "desc": "업다운뉴스 = 김경한 기자 / LG전자가 휴머노이드 로봇 개발 초기부터 안전성과 품질을 확보하기 위한 협력체계를 마련했다. 한국로봇산업진흥원과 업무협약을 맺고 평가 시스템 구축과 관련 표준 개발에 참여한다....",
+   "url": "https://www.updownnews.co.kr/news/articleView.html?idxno=319603",
+   "naver": "https://www.updownnews.co.kr/news/articleView.html?idxno=319603",
+   "pub": "2026-11-16T16:58:00+09:00"
   },
   "6-2": {
    "cat": "로봇&모빌리티",
-   "title": "독일 뉴라로보틱스, 에너지 기업 E.ON과 전력망 관리용 로봇 개발",
-   "desc": "독일 로봇기업 뉴라로보틱스(NEURA Robotics)가 유럽의 주요 에너지 기업 이온(E.ON) 및 독일 전력회사 엔비아엠(enviaM)과 협력해 전력 인프라에 피지컬 AI 기반 로봇을 도입한다. 해외 로봇 전문매체 로보틱스 앤드...",
-   "url": "https://www.irobotnews.com/news/articleView.html?idxno=49595",
-   "naver": "https://www.irobotnews.com/news/articleView.html?idxno=49595",
-   "pub": "2026-11-15T21:12:00+09:00"
+   "title": "LG전자, 한국로봇산업진흥원과 업무협약 체결",
+   "desc": "LG전자가 한국로봇산업진흥원과 함께 휴머노이드 로봇의 안전성 검증과 품질 평가 기준 마련에 나선다. 내년 1분기 이족보행 로봇 공개를 추진하는 가운데 개발 단계부터 인증 체계를 정비해 상용화에 대비한다는...",
+   "url": "https://news.tvchosun.com/site/data/html_dir/2026/11/16/2026111690215.html",
+   "naver": "https://n.news.naver.com/mnews/article/448/0000651381?sid=101",
+   "pub": "2026-11-16T16:46:00+09:00"
   },
   "6-3": {
    "cat": "로봇&모빌리티",
-   "title": "中 유비테크 '사람닮은 로봇', 차 딜러사에 400대 공급",
-   "desc": "사람을 닮은 중국 휴머노이드 로봇이 자동차 판매 현장에 대규모로 적용된다. 14일 중국 로봇 전문 포털 중국로봇망에 따르면 중국 유비테크(UBITECH, 优必选)가 욘다(YONDA, 永达汽车)와 전략적 협력 협약을 체결했다....",
-   "url": "https://www.irobotnews.com/news/articleView.html?idxno=49593",
-   "naver": "https://www.irobotnews.com/news/articleView.html?idxno=49593",
-   "pub": "2026-11-15T19:54:00+09:00"
+   "title": "호반그룹, 아파트에 자율주행 배송 로봇 도입…AI 무인 경비도 실증",
+   "desc": "호반그룹이 자율주행 로봇을 활용한 아파트 배송 서비스와 인공지능(AI) 기반 무인 경비 시스템 개발에 나섰다. 공동주택과 사옥에서 로봇의 실제 운영 성능을 검증하고 향후 주거시설 설계와 관리 서비스에 적용한다는...",
+   "url": "http://www.inews24.com/view/2026729",
+   "naver": "https://n.news.naver.com/mnews/article/031/0001075470?sid=101",
+   "pub": "2026-11-16T16:45:00+09:00"
   },
   "6-4": {
    "cat": "로봇&모빌리티",
-   "title": "정부 로봇 액추에이터 지원 본격화…동남권 기업에 열린 ‘기회의 창’",
-   "desc": "- 로봇 1대당 20~50개 필수 사용 - 기술 갖춘 지역 기업 개발 두각 정부는 피지컬 AI의 핵심 분야로 꼽히는 로봇 부품 지원에 본격적으로 나선다. 피지컬 AI 시대를 맞으면서 전 세계적으로 휴머노이드 로봇 양산 경쟁이...",
-   "url": "http://www.kookje.co.kr/news2011/asp/newsbody.asp?code=0200&key=20261116.22013004484",
-   "naver": "https://n.news.naver.com/mnews/article/658/0000161291?sid=101",
-   "pub": "2026-11-15T18:54:00+09:00"
+   "title": "로봇이 배울 사람의 손동작, 베트남 공장에서 모은다",
+   "desc": "로봇이 실제 작업을 배우려면 사람이 그 일을 하는 모습을 담은 데이터가 필요하다. 하지만 국내에서는 제조... 피지컬 AI는 로봇처럼 물리적인 장치가 실제 환경에서 상황을 파악하고 작업하는 기술이다. 데이터랩은 이...",
+   "url": "https://platum.kr/archives/298683",
+   "naver": "https://platum.kr/archives/298683",
+   "pub": "2026-11-16T16:40:00+09:00"
   },
   "6-5": {
    "cat": "로봇&모빌리티",
-   "title": "휴머노이드가 마트 계산대에 섰다… 「제21회 국제로봇콘테스트」 성료",
-   "desc": "산업통상부(장관 김정관)와 대구광역시가 공동 주최하고 한국로봇산업진흥원(원장 조영훈)이 주관한 '제21회 국제로봇콘테스트(IRC)'가 지난 13일부터 14일까지 이틀간 대구 엑스코에서 열려 성황리에 막을 내렸다....",
-   "url": "https://www.irobotnews.com/news/articleView.html?idxno=49586",
-   "naver": "https://www.irobotnews.com/news/articleView.html?idxno=49586",
-   "pub": "2026-11-15T18:52:00+09:00"
+   "title": "호반그룹, 로봇 배송 솔루션 스타트업과 '미래형 주거 서비스' 시범 운...",
+   "desc": "사진=호반그룹  호반그룹은 '2026 호반혁신기술공모전'에서 우수상을 수상한 로봇 배송 솔루션 기업 '와트(WATT)'와 협력해 서울 서초구 '호반써밋 양재'에서 자율주행 로봇 기반의 입주민 화물 운송 서비스를 시범 운영하는...",
+   "url": "http://www.sisacast.kr/news/articleView.html?idxno=101985",
+   "naver": "http://www.sisacast.kr/news/articleView.html?idxno=101985",
+   "pub": "2026-11-16T16:38:00+09:00"
   },
   "6-6": {
    "cat": "로봇&모빌리티",
-   "title": "日 야노경제연구소 \"피지컬 AI 로봇 시장, 2035년 321만대 규모 성장\"",
-   "desc": "전세계 피지컬 AI 로봇 시장이 오는 2035년 약 321만대(출하량 기준) 규모로 성장할 것이란 전망이 나왔다. 기존 산업용 로봇과 협동로봇은 물론 자율이동로봇(AMR), 휴머노이드 로봇, 4족 보행 로봇, 서비스 로봇, 드론...",
-   "url": "https://www.irobotnews.com/news/articleView.html?idxno=49578",
-   "naver": "https://www.irobotnews.com/news/articleView.html?idxno=49578",
-   "pub": "2026-11-15T18:02:00+09:00"
+   "title": "아이엘, '로봇손' 사업 진출…'아이엘핸드' 상표출원",
+   "desc": "피지컬 인공지능(AI) 데이터 플랫폼 기업 아이엘은 아이엘이 휴머노이드 로봇핸드 사업 강화를 위해 신규 브랜드 '아이엘핸드(ILHAND)'의 상표출원을 마쳤다고 16일 밝혔다. 이번 브랜드는 휴머노이드 로봇의 핵심 부품인...",
+   "url": "https://www.dailian.co.kr/news/view/1715624/?sc=Naver",
+   "naver": "https://n.news.naver.com/mnews/article/119/0003155748?sid=101",
+   "pub": "2026-11-16T15:49:00+09:00"
   },
   "6-7": {
    "cat": "로봇&모빌리티",
-   "title": "대만 에이수스, 휴머노이드 로봇 '갤럽' 개발에 박차…2028년 하반기 출...",
-   "desc": "대만 컴퓨터 전문업체인 에이수스(ASUS)가 휴머노이드 로봇 '갤럽(Gallop)'을 오는 2028년 출시한다. 에이수스는 지난 13일 자사 블로그를 통해 현재 개발 중인 휴머노이드 로봇 '갤럽'의 진행 상황을 소개했다. 에이수스는...",
-   "url": "https://www.irobotnews.com/news/articleView.html?idxno=49581",
-   "naver": "https://www.irobotnews.com/news/articleView.html?idxno=49581",
-   "pub": "2026-11-15T18:00:00+09:00"
+   "title": "휴머노이드가 사람 곁으로 온다… 한국로봇산업진흥원-LG전자, 안전·품...",
+   "desc": "휴머노이드 로봇은 사람과 같은 공간에서 움직이는 형태인 만큼 성능 경쟁 못지않게 안전성과 품질 신뢰가... 한국로봇산업진흥원(원장 조영훈)은 16일 LG전자(대표 류재철)와 '휴머노이드 로봇 품질 경쟁력 향상을 위한...",
+   "url": "https://kr.aving.net/news/articleView.html?idxno=1817043",
+   "naver": "https://kr.aving.net/news/articleView.html?idxno=1817043",
+   "pub": "2026-11-16T15:48:00+09:00"
   },
   "6-8": {
    "cat": "로봇&모빌리티",
-   "title": "강진군 청소년 200여 명, 교실 밖에서 만난 미래…AI 로봇부터 진로 탐색...",
-   "desc": "(AI) 로봇과 드론축구 등 평소 접하기 어려운 미래기술을 직접 체험하고, 다양한 진로 프로그램과 문화공연에... 행사장에서는 데이터 분석 로봇과 사이버파이 만보기, 스마트 로봇 레이싱 등 AI 관련 프로그램이 운영됐다....",
-   "url": "https://www.geconomy.co.kr/news/article.html?no=325673",
-   "naver": "https://www.geconomy.co.kr/news/article.html?no=325673",
-   "pub": "2026-11-15T17:42:00+09:00"
+   "title": "중부발전, '지능형 로봇 챌린지' 성료⋯피지컬 AI로 발전소 안전 혁신",
+   "desc": "지능형 로봇 경연대회를 성공적으로 마쳤다. 사내 직원과 민간 로봇 기업이 한 팀을 이뤄 탱크 외벽 자율 진단 로봇과 시설물 분석 드론 등 현장 적용성이 뛰어난 피지컬 AI 기술을 대거 선보였다. 중부발전은 13일...",
+   "url": "https://www.etoday.co.kr/news/view/2648776",
+   "naver": "https://www.etoday.co.kr/news/view/2648776",
+   "pub": "2026-11-16T15:36:00+09:00"
   },
   "6-9": {
    "cat": "로봇&모빌리티",
-   "title": "\"화학업계 新시장 된 로봇·AI…현대차와 휴머노이드 소재 협력\"",
-   "desc": "“휴머노이드 로봇과 인공지능(AI) 데이터센터가 바스프의 성장 동력이 될 것입니다.” 앤디 포슬스웨이트... 그는 “현대자동차와 기아, 보스턴다이내믹스, 로봇 부품업체들과 소재 공동 개발을 위한 논의를 하고 있다”...",
-   "url": "https://www.hankyung.com/article/2026111574371",
-   "naver": "https://n.news.naver.com/mnews/article/015/0005353967?sid=101",
-   "pub": "2026-11-15T17:24:00+09:00"
+   "title": "\"위험 작업은 로봇에게\"… 중부발전, 피지컬 AI 기술 발굴",
+   "desc": "한국중부발전이 발전소의 위험 작업을 줄이고 설비 점검의 효율성을 높일 인공지능(AI) 로봇 기술 발굴에 나섰다. 저장소 외벽을 이동하며 시설물을 점검하는 자율진단 로봇이 대통령상을 받았다. 한국중부발전은 지난...",
+   "url": "http://www.the-biz.co.kr/news/articleView.html?idxno=731478",
+   "naver": "http://www.the-biz.co.kr/news/articleView.html?idxno=731478",
+   "pub": "2026-11-16T15:26:00+09:00"
   },
   "6-10": {
    "cat": "로봇&모빌리티",
-   "title": "세탁가전 1000만대 생산한 LG전자 미국 공장…로봇도 실증",
-   "desc": "최근에는 인공지능(AI)과 로봇을 활용한 제조공정 혁신에 속도를 내며 피지컬 AI 기술의 실증 거점으로... 2023년 세계경제포럼(WEF)의 ‘등대공장’에 선정된 이곳은 산업용 로봇 약 300대와 AI, 디지털 트윈 등을 활용해...",
-   "url": "http://www.newstomato.com/ReadNews.aspx?no=1320432&inflow=N",
-   "naver": "http://www.newstomato.com/ReadNews.aspx?no=1320432&inflow=N",
-   "pub": "2026-11-15T17:18:00+09:00"
+   "title": "로봇의 '손끝 지능' 높인다…왓츠랩, 피지컬AI 데이터 기술 공유",
+   "desc": "휴머노이드 로봇의 산업현장 활용을 위한 정교한 손 조작 능력이 중요해지면서 고품질 손동작 데이터 확보와... 있다”며 “로봇 하드웨어와 AI 기술이 발전하면서 이러한 작업까지 자동화하려는 수요가 커지고 있다”고...",
+   "url": "https://www.etnews.com/20261116000381",
+   "naver": "https://n.news.naver.com/mnews/article/030/0003486164?sid=101",
+   "pub": "2026-11-16T15:25:00+09:00"
   },
   "7-1": {
    "cat": "AI",
-   "title": "LG전자, 테네시 공장 '1000만대 생산'…이젠 피지컬 AI가 움직인다",
-   "desc": "인공지능(AI) 기술까지 확대 적용하고 있다. LG전자는 미국 테네시주 클락스빌에 위치한 생산법인에서 누적... ◆ 자동화율 70% '등대공장'…피지컬 AI 실증으로 제조혁신 확대 현지 시장에 최적화된 제품을 안정적으로...",
-   "url": "https://www.apnews.kr/news/articleView.html?idxno=3053143",
-   "naver": "https://www.apnews.kr/news/articleView.html?idxno=3053143",
-   "pub": "2026-11-15T22:28:00+09:00"
+   "title": "김희수 의장, 시도의장협의회서 피지컬 AI 특별법 촉구",
+   "desc": "피지컬 AI 관련 제도는 '인공지능 발전과 신뢰 기반 조성 등에 관한 기본법'과 '지능형 로봇 개발 및 보급 촉진법' 등 개별 법률을 중심으로 운영된다. 이 구조로는 산업 특성을 반영한 종합 지원이 어렵다는 게 김...",
+   "url": "http://www.jeollailbo.com/news/articleView.html?idxno=816855",
+   "naver": "http://www.jeollailbo.com/news/articleView.html?idxno=816855",
+   "pub": "2026-11-16T16:44:00+09:00"
   },
   "7-2": {
    "cat": "AI",
-   "title": "‘킬러 로봇’ 규제 논의하는 국제사회…AI 무기 확산에 대응 고심",
-   "desc": "유엔, 16일 자율살상무기 규제·금지 방안 논의…인간 통제 수준 쟁점 AI 탑재 드론 등 전장 활용 확대... 하지만 인공지능(AI) 기술의 발전과 군사적 활용 속도가 빨라 실효성 있는 국제 규범을 마련할 수 있을지는...",
-   "url": "https://www.segye.com/newsView/20261115509526?OutUrl=naver",
-   "naver": "https://n.news.naver.com/mnews/article/022/0004175309?sid=104",
-   "pub": "2026-11-15T22:06:00+09:00"
+   "title": "\"고영향 AI 기준 모호…에이전트·피지컬 AI도 법적 공백\"",
+   "desc": "에이전트 AI와 피지컬 AI가 확산하면서 사고 발생 시 책임 소재를 명확히 해야 한다는 목소리도 제기됐다. 이주희·최형두 의원실·한국정보통신법학회·한국데이터인공지능법정책학회·정보통신정책연구원(KISDI)...",
+   "url": "https://www.mt.co.kr/tech/2026/11/16/2026111615234046315",
+   "naver": "https://n.news.naver.com/mnews/article/008/0005441805?sid=105",
+   "pub": "2026-11-16T16:30:00+09:00"
   },
   "7-3": {
    "cat": "AI",
-   "title": "항차, 글로벌 딜러 콘퍼런스에서 LINGTRA AI-Fork 로봇 공개하고 2030 비전...",
-   "desc": "항차는 이 자리에서 다섯 모델로 구성된 '링트라 에이아이 포크(LINGTRA AI-Fork) 로봇을 공개해 큰 관심을 끌었다. 항차의 산업용 체화 AI 모델인 로지마인드(LogiMind)를 기반으로 구동되는 지게차로 주변 환경과...",
-   "url": "https://www.irobotnews.com/news/articleView.html?idxno=49594",
-   "naver": "https://www.irobotnews.com/news/articleView.html?idxno=49594",
-   "pub": "2026-11-15T21:06:00+09:00"
+   "title": "멋쟁이사자처럼, 베트남 호치민에 ‘피지컬 AI 데이터랩’ 개소",
+   "desc": "교육부터 현장 데이터 수집·검수까지 원스톱 운영… 피지컬 AI 데이터 공급망 구축 AI 인재 육성 기업 멋쟁이사자처럼(대표 나성영)은 지난 9일 베트남 호치민에 피지컬 AI 현장 데이터 확보를 위한 거점 시설인 ‘PHYSICAL...",
+   "url": "https://www.seoul.co.kr/news/economy/2026/11/16/20261116500190?wlog_tag3=naver",
+   "naver": "https://n.news.naver.com/mnews/article/081/0003699846?sid=101",
+   "pub": "2026-11-16T16:02:00+09:00"
   },
   "7-4": {
    "cat": "AI",
-   "title": "AI가 되살린 메릴린 먼로와 멸종한 코뿔소…무엇이 진짜일까",
-   "desc": "로봇은 건초더미 속에서 바늘 하나를 찾기 위해 끊임없이 움직인다.인공지능(AI)과 첨단기술을 이용해 만들어 낸 장면들이다. 그렇다면 우리가 눈으로 보고 귀로 듣는 것은 모두 진짜일까. AI가 만들어 낸 이미지와...",
-   "url": "http://www.ikoreanspirit.com/news/articleView.html?idxno=88262",
-   "naver": "http://www.ikoreanspirit.com/news/articleView.html?idxno=88262",
-   "pub": "2026-11-15T21:04:00+09:00"
+   "title": "대구대 컨소시엄, 피지컬 AI 반도체 과제 선정…국비 107억5천만원 투입",
+   "desc": "이번에 선정된 연구 과제는 'Physical AI(물리적 인공지능)용 생체모사 다중감각 융합 시스템반도체 및 제품형... 기존 방식처럼 개별 센서를 단순 연결하는 수준을 넘어 감응소재와 센서소자, 저잡음 회로, AI...",
+   "url": "https://www.kyongbuk.co.kr/news/articleView.html?idxno=4090906",
+   "naver": "https://www.kyongbuk.co.kr/news/articleView.html?idxno=4090906",
+   "pub": "2026-11-16T15:50:00+09:00"
   },
   "7-5": {
    "cat": "AI",
-   "title": "[기고] 피지컬 AI, 현장 잇는 특화망이 경쟁력",
-   "desc": "이런 AI가 피지컬 AI로 진화하면 어떻게 될까. AI가 로봇의 머리가 돼 팔과 바퀴를 제어하고, 여러 로봇과 협동해 공장에서 부품을 옮기고, 물류창고를 누비고, 병원 복도를 오가며 물품을 나른다. 현실 공간에서 직접 보고...",
-   "url": "https://www.dt.co.kr/article/12095274?ref=naver",
-   "naver": "https://n.news.naver.com/mnews/article/029/0003059214?sid=110",
-   "pub": "2026-11-15T18:16:00+09:00"
+   "title": "완주군의회, '군민 체감하는 피지컬 AI산업 육성 조례' 입법예고",
+   "desc": "조례안은 ▲ 5년 단위의 피지컬 AI산업 육성 기본계획 수립 ▲ 자동차·수소·농기계 등 지역 주력산업의 AI 전환 지원 ▲ 전문인력 양성과 청년 취업 연계 ▲ 기업·연구기관 협력체계 구축 등을 담았다. 아울러 도로와...",
+   "url": "https://www.yna.co.kr/view/AKR20261116126300055?input=1195m",
+   "naver": "https://n.news.naver.com/mnews/article/001/0016444452?sid=100",
+   "pub": "2026-11-16T15:38:00+09:00"
   },
   "7-6": {
    "cat": "AI",
-   "title": "\"AI금융 무산·피지컬 AI 후퇴 위기\"…'젠슨 황 복귀론' 확산",
-   "desc": "패트릭 리우 엔비디아 자율주행 수석이사는 청원 글을 통해 “젠슨 황이 없다면 자율주행과 피지컬 AI산업은 수년간 후퇴를 겪을 것”이라고 주장했다. ◇“AI산업 무너질 것” 젠슨 황 퇴진으로 엔비디아 지배력이...",
-   "url": "https://www.hankyung.com/article/2026111575541",
-   "naver": "https://n.news.naver.com/mnews/article/015/0005353999?sid=104",
-   "pub": "2026-11-15T17:54:00+09:00"
+   "title": "아이엘, 피지컬AI 핵심 부품 ‘로봇핸드’로 사업 확장",
+   "desc": "피지컬AI 데이터 플랫폼 기업 아이엘(307180)이 로봇핸드 분야로 사업 영역을 확장한다. 이를 통해 휴머노이드 기반 피지컬AI 사업 역량 강화를 추진한다. 아이엘은 휴머노이드 로봇핸드 사업 확대를 위한 신규 브랜드...",
+   "url": "https://www.sedaily.com/article/20114902?ref=naver",
+   "naver": "https://n.news.naver.com/mnews/article/011/0004682668?sid=101",
+   "pub": "2026-11-16T14:56:00+09:00"
   },
   "7-7": {
    "cat": "AI",
-   "title": "[한국보건산업진흥원 보건신기술(NET) 인증기업 CEO] AI·코호트 생체 빅...",
-   "desc": "지피는 14년간 연속된 시계열 코호트 데이터 약 4,200만개의 생체 데이터를 토대로 AI 기반 성장 진단·예측 플랫폼을 구축해 온 기업이다. AI 기반 영유아 건강증진 기여로 교육부장관 표창을 수상했으며, 성장 관련...",
-   "url": "https://magazine.hankyung.com/job-joy/article/202611167760d",
-   "naver": "https://magazine.hankyung.com/job-joy/article/202611167760d",
-   "pub": "2026-11-16T01:06:00+09:00"
+   "title": "팅크웨어, 완성차 공급 확대 속도…IP·피지컬AI 사업 모색",
+   "desc": "해외 지도 구축 역량을 활용해 슈퍼앱·디지털트윈 분야로 사업 범위를 넓히는 동시에 비전AI 제품의 상용화 경험을 바탕으로 피지컬AI 분야 진출도 검토하고 있다. 팅크웨어 관계자는 \"메모리 가격 상승에 따른 비용...",
+   "url": "https://www.m-i.kr/news/articleView.html?idxno=2019128",
+   "naver": "https://www.m-i.kr/news/articleView.html?idxno=2019128",
+   "pub": "2026-11-16T14:54:00+09:00"
   },
   "7-8": {
    "cat": "AI",
-   "title": "FT “삼성, 반도체 넘어 AI 인프라 도전”…통합 역량 관건",
-   "desc": "삼성그룹이 메모리 반도체를 넘어 인공지능(AI) 데이터센터의 설계부터 건설, 운영, 전력 공급까지 아우르는 종합 AI 인프라 기업으로의 변신을 추진하고 있다는 분석이 나왔다. 다만 계열사 간 사업 조정과 외부 고객...",
-   "url": "https://www.g-enews.com/view.php?ud=2026111523272259769a1f309431_1",
-   "naver": "https://www.g-enews.com/view.php?ud=2026111523272259769a1f309431_1",
-   "pub": "2026-11-16T01:02:00+09:00"
+   "title": "대구대 연구팀, 107억 투입해 '피지컬 AI용 시스템반도체' 개발 착수",
+   "desc": "과제명은 'Physical AI용 생체모사 다중감각 융합 시스템반도체 및 제품형 SiP 모듈 개발과 현장 실증'이다.... 회로·AI 처리반도체를 통합 설계해 오판율을 낮춘다. 김 교수 연구팀은 28나노 공정 기반 융합 시스템온칩...",
+   "url": "https://www.mt.co.kr/policy/2026/11/16/2026111614170118585",
+   "naver": "https://n.news.naver.com/mnews/article/008/0005441696?sid=102",
+   "pub": "2026-11-16T14:36:00+09:00"
   },
   "7-9": {
    "cat": "AI",
-   "title": "한 총리, ‘AI 부정행위’ 대응 관계부처 회의…수능시험장 관리 강화 ...",
-   "desc": "한성숙 국무총리는 오늘(16일) 관계 부처와 함께 '인공지능(AI) 활용 부정행위 대응 방안'을 논의합니다. 오늘 회의에는 교육부, 고용노동부, 행정안전부 등 관계 부처 차관이 참석할 예정입니다. 회의에서는 AI를 활용한...",
-   "url": "https://news.kbs.co.kr/news/pc/view/view.do?ncd=8713280&ref=A",
-   "naver": "https://n.news.naver.com/mnews/article/056/0012294240?sid=100",
-   "pub": "2026-11-16T01:00:00+09:00"
+   "title": "[기획] '피지컬 AI' 3.1조 투입… 현장 실증·부처 간 연계가 관건",
+   "desc": "16일 정부의 2027년도 예산안에 따르면 피지컬 AI 지원 예산은 전년 대비 241.1% 증가한 3조716억원으로 편성됐다. 이는 정부 전체 AI 예산 16조4000억원의 약 20%에 해당하는 규모다. 정부는 산업현장 실증과 핵심기술...",
+   "url": "https://www.m-i.kr/news/articleView.html?idxno=2019062",
+   "naver": "https://www.m-i.kr/news/articleView.html?idxno=2019062",
+   "pub": "2026-11-16T14:32:00+09:00"
+  },
+  "7-10": {
+   "cat": "AI",
+   "title": "\"미래 피지컬 AI 시대, 네트워크 성능·구조 혁신 불가피\"",
+   "desc": "특히 AI로 현실 세계의 사물을 인식하고 로봇 같은 기계를 직접 움직이도록 하는 '피지컬 AI(Physical AI)'가 산업 현장에 빠르게 보급되고 있는 것은 주목할만한 변화다. 피지컬 AI의 본격적인 도래와 함께 AI 기술과...",
+   "url": "https://www.koit.co.kr/news/articleView.html?idxno=209935",
+   "naver": "https://www.koit.co.kr/news/articleView.html?idxno=209935",
+   "pub": "2026-11-16T13:30:00+09:00"
   }
  }
 }
