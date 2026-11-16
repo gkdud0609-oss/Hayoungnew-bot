@@ -2,39 +2,42 @@ name: 데일리 뉴스 클리핑
 
 on:
   schedule:
-    - cron: "0 8 * * 1-5"   # 월~금 08:00 UTC = 한국시간 오후 5시 정기 발송
-    - cron: "0 5 * * 0"     # 일요일 05:00 UTC = 한국시간 오후 2시 (금 17시 ~ 일 14시 기사)
-    - cron: "*/5 * * * *"   # 텔레그램 지켜보기 (한 번에 25분, 끝나면 대기 중인 다음 실행이 바로 이어받음)
+    # 봇은 스스로 다음 실행을 이어 붙이며 계속 깨어 있어요 (정기 발송도 깨어 있는 봇이 직접 함)
+    # 아래 예약은 혹시 이어 달리기가 끊겼을 때 다시 깨우는 안전장치예요
+    - cron: "*/5 * * * *"
+    - cron: "23 * * * *"
   workflow_dispatch:         # Actions 탭에서 'Run workflow' 버튼으로 바로 실행
     inputs:
       mode:
-        description: "daily = 정기 발송 / command = '뉴스' 답장 / poll = 텔레그램 지켜보기 시작"
-        default: daily
+        description: "poll = 봇 깨우기(평소엔 이것) / daily = 정기 뉴스 지금 보내기 / command = '뉴스' 답장 테스트"
+        default: poll
         type: choice
-        options: [daily, command, poll]
+        options: [poll, daily, command]
 
 permissions:
-  contents: write   # 마지막 뉴스 목록(last_news.json)을 저장하기 위해 필요
+  contents: write   # 뉴스 목록·정리본·발송 기록 저장
+  actions: write    # 봇이 다음 실행을 스스로 이어 붙이기 위해 필요
 
 jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      MODE: ${{ inputs.mode || 'poll' }}
     concurrency:
-      # 텔레그램 지켜보기는 한 번에 하나만 (중복 답장 방지)
-      group: news-${{ (github.event.schedule == '*/5 * * * *' || inputs.mode == 'poll') && 'poll' || 'daily' }}
+      # 봇(지켜보기)은 한 번에 하나만 (중복 답장·중복 발송 방지)
+      group: news-${{ (inputs.mode || 'poll') == 'poll' && 'poll' || 'manual' }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v5
 
       - name: Claude Code 미리 설치 (요약 속도 향상)
-        if: ${{ github.event.schedule == '*/5 * * * *' || inputs.mode == 'poll' }}
+        if: env.MODE == 'poll'
         run: npm install -g @anthropic-ai/claude-code > /dev/null 2>&1 || true
 
       - name: 뉴스 수집 및 텔레그램 발송
         run: python3 news_bot.py
         env:
-          MODE: ${{ inputs.mode || (github.event.schedule == '*/5 * * * *' && 'poll' || 'daily') }}
           # ★ 실제 값은 GitHub Secrets에 넣어요 (이 파일은 수정할 필요 없음)
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
@@ -45,11 +48,17 @@ jobs:
       - name: 봇 데이터 저장 (뉴스 목록·정리본·피드백)
         if: always()
         run: |
-          if [ -n "$(git status --porcelain -- last_news.json last_report.json style_feedback.txt)" ]; then
+          if [ -n "$(git status --porcelain -- last_news.json last_report.json style_feedback.txt bot_state.json)" ]; then
             git config user.name "news-bot"
             git config user.email "news-bot@users.noreply.github.com"
-            git add -A -- last_news.json last_report.json style_feedback.txt
+            git add -A -- last_news.json last_report.json style_feedback.txt bot_state.json
             git commit -m "봇 데이터 저장"
             git pull --rebase -X theirs -q || true
             git push
           fi
+
+      - name: 다음 실행 이어 붙이기 (봇이 계속 깨어 있도록)
+        if: always() && env.MODE == 'poll' && !cancelled()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run daily-news.yml --repo "${{ github.repository }}" --ref "${{ github.ref_name }}" -f mode=poll
