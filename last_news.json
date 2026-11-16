@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-16T17:46:08.595984+09:00",
+ "saved": "2026-11-16T18:01:59.664487+09:00",
  "items": {
   "1-1": {
    "cat": "자사뉴스",
@@ -355,13 +355,53 @@
   },
   "6-1": {
    "cat": "로봇&모빌리티",
+   "title": "호반그룹, 공동주택에 자율주행 로봇 도입",
+   "desc": "호반써밋 양재 입주민이 단지 내에서 자율주행 로봇을 이용해 소화물을 운반하고 있다. 사진=호반그룹 한국금융경제신문=조희경 기자 | 호반그룹이 자율주행 로봇을 활용한 주거 서비스 개발에 나섰다. 호반그룹은...",
+   "url": "https://www.kfenews.co.kr/news/articleView.html?idxno=668215",
+   "naver": "https://www.kfenews.co.kr/news/articleView.html?idxno=668215",
+   "pub": "2026-11-16T18:00:00+09:00"
+  },
+  "6-2": {
+   "cat": "로봇&모빌리티",
+   "title": "LG전자, 휴머노이드 안전 인증 추진…로봇산업진흥원과 맞손",
+   "desc": "LG전자가 한국로봇산업진흥원(KIRIA)과 로보틱스 분야의 안전?품질 경쟁력 강화에 속도를 낸다. LG전자는 최근 서울 영등포구 LG트윈타워에서 한국로봇산업진흥원과 '휴머노이드 로봇 품질 경쟁력 향상을 위한 상호협력...",
+   "url": "http://www.wowtv.co.kr/NewsCenter/News/Read?articleId=A202611160107&t=NN",
+   "naver": "https://n.news.naver.com/mnews/article/215/0001272938?sid=101",
+   "pub": "2026-11-16T17:54:00+09:00"
+  },
+  "6-3": {
+   "cat": "로봇&모빌리티",
+   "title": "휴머닉스, 'K-유니콘 드림쇼 2026' 참가… '로봇이 로봇을 학습시키다',...",
+   "desc": "인간 신체 데이터 플랫폼 기반 근기능 케어 로봇 테라피 기업 휴머닉스(HUMANICS, 대표 최정수)가 오는 11월... 휴머닉스는 딥테크 청년창업사관학교 1기 입교기업으로, 피지컬 AI 기반 운동 로봇의 기술 고도화와 사업화...",
+   "url": "https://www.epnc.co.kr/news/articleView.html?idxno=409855",
+   "naver": "https://www.epnc.co.kr/news/articleView.html?idxno=409855",
+   "pub": "2026-11-16T17:52:00+09:00"
+  },
+  "6-4": {
+   "cat": "로봇&모빌리티",
+   "title": "中 원전 점검에 AR 헬멧·로봇 투입…AI로 안전·효율 높인다",
+   "desc": "중국이 인공지능(AI)과 증강현실(AR), 자율주행 로봇을 원자력발전소에 도입하며 원전 운영의 디지털 전환에... 다른 원전에도 4족 보행 로봇과 자율주행 드론이 투입되고 있다. 중국 원전업계는 AI가 원전의 설계부터...",
+   "url": "https://www.the-today.com/news/articleView.html?idxno=93668",
+   "naver": "https://www.the-today.com/news/articleView.html?idxno=93668",
+   "pub": "2026-11-16T17:50:00+09:00"
+  },
+  "6-5": {
+   "cat": "로봇&모빌리티",
+   "title": "가스 누출·충돌 징후 한 번에 감지…대구대, 로봇·드론용 반도체 개발",
+   "desc": "대구대가 이끄는 연구단은 이 기술을 건설현장 로봇에 탑재해 가스 누출과 화재 전조, 충돌 등 이상 징후를... 로보아이의 건설 현장 로봇에서 이상 감지율 97% 이상, 오경보율 1% 이하를 목표로 검증하고, 디메이커스의...",
+   "url": "https://www.edaily.co.kr/News/Read?newsId=03335766645646376&mediaCodeNo=257&utm_source=naver&utm_medium=referral&utm_campaign=news_syndication&utm_content=original_article",
+   "naver": "https://n.news.naver.com/mnews/article/018/0006410648?sid=102",
+   "pub": "2026-11-16T17:46:00+09:00"
+  },
+  "6-6": {
+   "cat": "로봇&모빌리티",
    "title": "BD 지분 더 산 현대글로비스, '로봇사업' 손실에 장부가 감소",
    "desc": "현대자동차그룹이 휴머노이드 로봇 아틀라스 양산을 추진하는 가운데 BD에 대한 추가 투자와 수익성 확보가 동시에 과제로 떠올랐다. 현대글로비스는 자동차운반선 사업을 중심으로 실적을 확대하고 있지만 로봇사...",
    "url": "https://www.bloter.net/news/articleView.html?idxno=678782",
    "naver": "https://n.news.naver.com/mnews/article/293/0000093340?sid=101",
    "pub": "2026-11-16T17:42:00+09:00"
   },
-  "6-2": {
+  "6-7": {
    "cat": "로봇&모빌리티",
    "title": "ZKTeco, AI 자율주행 순찰로봇 'RobotGo' 시리즈 출시",
    "desc": "글로벌 보안·출입통제 전문기업 ZKTeco가 AI 기반 자율주행 순찰로봇 신제품 'RobotGo-Mini'와 'RobotGo-Max'를... RobotGo-Mini는 강화학습 기반 AI 동작 제어 기술을 적용한 소형 순찰로봇이다. 좁은 통로나 시설 내부 등...",
@@ -369,7 +409,7 @@
    "naver": "https://www.boannews.com/news/articleView.html?idxno=147312",
    "pub": "2026-11-16T17:36:00+09:00"
   },
-  "6-3": {
+  "6-8": {
    "cat": "로봇&모빌리티",
    "title": "[TOP's Pick] [전자·IT] LG전자, 휴머노이드 로봇 품질 경쟁력 강화 나서...",
    "desc": "◆LG전자, 휴머노이드 로봇 품질 경쟁력 강화 나서 LG전자가 한국로봇산업진흥원(KIRIA)과 손을 잡고 피지컬 AI 기반 대표 미래사업으로 육성 중인 로보틱스 분야의 안전∙품질 경쟁력 강화에 속도....",
@@ -377,7 +417,7 @@
    "naver": "https://www.topdaily.kr/articles/112929",
    "pub": "2026-11-16T17:35:00+09:00"
   },
-  "6-4": {
+  "6-9": {
    "cat": "로봇&모빌리티",
    "title": "젠트로피, 전기이륜차 국가표준 3개 부문 확보…'풀스택' 인증",
    "desc": "전기이륜차 제조·배터리 교환 서비스 기업 젠트로피(공동대표 이재상·주승돈)는 국가표준(KS) 사양을 적용한 자사 전기이륜차가 지난 10일 기후에너지환경부의 전기이륜차 보급 대상 차종으로 선정됐다고 밝혔다....",
@@ -385,7 +425,7 @@
    "naver": "https://n.news.naver.com/mnews/article/008/0005441880?sid=101",
    "pub": "2026-11-16T17:25:00+09:00"
   },
-  "6-5": {
+  "6-10": {
    "cat": "로봇&모빌리티",
    "title": "호반 '로봇 친화형' 아파트, 배송·무인경비까지 척척",
    "desc": "호반그룹이 아파트 단지와 사옥에서 로봇 서비스 실증에 나섰다. 입주민의 짐을 집 앞까지 옮기는 배송 로봇과 단지를 순찰하는 무인 경비 로봇이 핵심이다. 호반그룹은 스타트업과 협력해 공동주택과 사옥에서 로봇...",
@@ -393,125 +433,85 @@
    "naver": "https://n.news.naver.com/mnews/article/015/0005354377?sid=101",
    "pub": "2026-11-16T17:20:00+09:00"
   },
-  "6-6": {
-   "cat": "로봇&모빌리티",
-   "title": "LG전자, 로봇산업진흥원과 휴머노이드 안전성 검증…클로이드 시범인증...",
-   "desc": "투데이e코노믹 = 유서진 기자 | LG전자가 한국로봇산업진흥원과 휴머노이드 로봇의 안전성과 사용성을 평가하는 체계를 마련한다. 가정용 로봇 ‘LG 클로이드(CLOiD)’의 국내 안전 시범인증도 추진한다. LG전자는 지난 13일...",
-   "url": "https://www.todayeconomic.com/news/article.html?no=32862",
-   "naver": "https://www.todayeconomic.com/news/article.html?no=32862",
-   "pub": "2026-11-16T17:18:00+09:00"
-  },
-  "6-7": {
-   "cat": "로봇&모빌리티",
-   "title": "[김인수칼럼] 로봇·드론·전기차 목줄 쥔 中 자석",
-   "desc": "받쳐야 '로봇이나 자율주행 기술에서 미국이 중국을 앞선들 뭐 하나' '한국이 방산을 유럽에 수출하는데... 로봇은 관절마다 모터가 달려 있다. 미사일·드론·전기차 역시 고성능 모터가 필수다. 그런데 그 모터의...",
-   "url": "https://www.mk.co.kr/article/12210097",
-   "naver": "https://n.news.naver.com/mnews/article/009/0005764492?sid=110",
-   "pub": "2026-11-16T17:15:00+09:00"
-  },
-  "6-8": {
-   "cat": "로봇&모빌리티",
-   "title": "중부발전, 발전소 현장 피지컬 AI 기술 발굴…‘지능형 로봇 챌린지’ ...",
-   "desc": "한국중부발전(사장 이영조)은 지난 13일 산업통상부 주최로 진행된 제21회 국제로봇콘테스트에서 발전소 현장 피지컬 AI 기술 발굴을 위해 ‘한국중부발전 지능형 로봇 챌린지’대회를 개최했다고 16일 밝혔다. 대회는...",
-   "url": "https://zdnet.co.kr/view/?no=20261116170846",
-   "naver": "https://n.news.naver.com/mnews/article/092/0002445529?sid=105",
-   "pub": "2026-11-16T17:10:00+09:00"
-  },
-  "6-9": {
-   "cat": "로봇&모빌리티",
-   "title": "LG전자, 한국로봇산업진흥원과 업무협약 체결",
-   "desc": "LG전자가 한국로봇산업진흥원과 함께 휴머노이드 로봇의 안전성 검증과 품질 평가 기준 마련에 나선다. 내년 1분기 이족보행 로봇 공개를 추진하는 가운데 개발 단계부터 인증 체계를 정비해 상용화에 대비한다는...",
-   "url": "https://news.tvchosun.com/site/data/html_dir/2026/11/16/2026111690215.html",
-   "naver": "https://n.news.naver.com/mnews/article/448/0000651381?sid=101",
-   "pub": "2026-11-16T16:46:00+09:00"
-  },
-  "6-10": {
-   "cat": "로봇&모빌리티",
-   "title": "호반그룹, 아파트에 자율주행 배송 로봇 도입…AI 무인 경비도 실증",
-   "desc": "호반그룹이 자율주행 로봇을 활용한 아파트 배송 서비스와 인공지능(AI) 기반 무인 경비 시스템 개발에 나섰다. 공동주택과 사옥에서 로봇의 실제 운영 성능을 검증하고 향후 주거시설 설계와 관리 서비스에 적용한다는...",
-   "url": "http://www.inews24.com/view/2026729",
-   "naver": "https://n.news.naver.com/mnews/article/031/0001075470?sid=101",
-   "pub": "2026-11-16T16:45:00+09:00"
-  },
   "7-1": {
    "cat": "AI",
-   "title": "김희수 전북도의장 \"피지컬 AI 특별법 조속 제정해야\"",
-   "desc": "인공지능(AI) 특별법'의 조속한 제정을 정부와 국회에 촉구하고 나섰다. 16일 전북도의회에 따르면 김 의장은 이날 열린 '2026년 제7차 대한민국시도의회의장협의회'에 참석해 피지컬 AI 산업을 국가 차원에서...",
-   "url": "https://www.newsis.com/view/NISX20261116_0003869915",
-   "naver": "https://n.news.naver.com/mnews/article/003/0014325660?sid=102",
-   "pub": "2026-11-16T17:42:00+09:00"
+   "title": "충북농협, AI 차단 방역 총력 대응…시군지부장 회의 등 개최",
+   "desc": "이들은 지난 12일 충북 진천에서 발생한 고병원성 조류인플루엔자(AI)의 추가 확산을 차단하기 위한 방역 대응 방안을 중점적으로 점검했다. 또 농업예산 반영과 사업장 안전관리, 농·축협 건전결산, 쌀 소비촉진, 연도 말...",
+   "url": "https://www.nocutnews.co.kr/news/6607710?utm_source=naver&utm_medium=article&utm_campaign=20261116175859",
+   "naver": "https://n.news.naver.com/mnews/article/079/0004210363?sid=102",
+   "pub": "2026-11-16T17:59:00+09:00"
   },
   "7-2": {
    "cat": "AI",
-   "title": "티맵모빌리티, 3Q영업익 33억원 흑자 전환···AI·데이터 사업 성장",
-   "desc": "인공지능(AI)과 모빌리티 데이터 중심의 사업 전환이 실적 개선을 이끌었다. 특히 완성차 탑재형... AI 기반 서비스 이용도 확대됐다. AI 에이전트 트래픽은 590만명을 기록했으며, 장소 탐색과 추천 등 다양한 콘텐츠를...",
-   "url": "https://www.seoulfn.com/news/articleView.html?idxno=643002",
-   "naver": "https://www.seoulfn.com/news/articleView.html?idxno=643002",
-   "pub": "2026-11-16T17:41:00+09:00"
+   "title": "AI가 스스로 판단하다 사고 쳤다면?…책임 물을 법은 '공백'",
+   "desc": "인공지능(AI)이 단순히 질문에 답하는 수준을 넘어 스스로 판단하고 행동하는 에이전트AI와 피지컬AI로 발전하면서 현행 법체계의 보완이 필요하다는 지적이 나왔다. 기존 AI기본법은 생성형AI를 중심으로 설계돼 있어...",
+   "url": "https://www.newsis.com/view/NISX20261116_0003870409",
+   "naver": "https://n.news.naver.com/mnews/article/003/0014325689?sid=105",
+   "pub": "2026-11-16T17:58:00+09:00"
   },
   "7-3": {
    "cat": "AI",
-   "title": "증평군, 인근 AI 확진 따라 긴급 대책회의 개최···지역 내 유입 차단...",
-   "desc": "충북 증평군은 진천군 소재 오리농장에서 고병원성 조류인플루엔자(AI)가 확진됨에 따라 지역 내 유입을... 이날 이 군수는 인근 지역의 AI 발생 상황을 공유하며 증평으로의 확산을 차단하기 위해 가금농가 예찰과 소독을...",
-   "url": "http://www.enewstoday.co.kr/news/articleView.html?idxno=2492964",
-   "naver": "http://www.enewstoday.co.kr/news/articleView.html?idxno=2492964",
-   "pub": "2026-11-16T17:40:00+09:00"
+   "title": "[3Q실적] 티맵, 영업익 33억 흑자 달성… AI·데이터 사업 성장 견인",
+   "desc": "실적 개선은 인공지능(AI)과 모빌리티 데이터 사업 성장이 이끌었다. 티맵 오토(TMAP AUTO), 운전습관 기반... AI 에이전트 트래픽은 590만명, 장소 탐색과 추천 등 이동 생활 관련 콘텐츠 트래픽은 1470만명 이상을...",
+   "url": "https://www.financialpost.co.kr/news/articleView.html?idxno=301289",
+   "naver": "https://www.financialpost.co.kr/news/articleView.html?idxno=301289",
+   "pub": "2026-11-16T17:58:00+09:00"
   },
   "7-4": {
    "cat": "AI",
-   "title": "한국다크팩토리AI사업협동조합 창립…제조 AI 공동수주·실증 추진",
-   "desc": "13일 광명역서 창립총회 개최…MES·AI·로봇 등 제조혁신 전문기업 협력 김동윤 초대 이사장 선출…기술 통합... 한국다크팩토리AI사업협동조합은 지난 13일 경기도 광명시 KTX광명역 회의실에서 창립총회를 개최했다. 이날...",
-   "url": "https://www.hellot.net/news/article.html?no=116358",
-   "naver": "https://www.hellot.net/news/article.html?no=116358",
-   "pub": "2026-11-16T17:38:00+09:00"
+   "title": "앤트그룹, 로봇에 '촉각' 더하는 AI 공개…물체 잡는 힘까지 판단",
+   "desc": "앤트그룹이 로봇이 손끝의 촉각 정보를 이해하고 물체를 잡는 힘까지 판단할 수 있도록 하는 AI 모델을 공개했다. 시각과 언어, 동작 생성에 이어 촉각까지 로봇 AI에 결합한 것으로, 열쇠로 자물쇠를...",
+   "url": "https://www.aitimes.com/news/articleView.html?idxno=217455",
+   "naver": "https://www.aitimes.com/news/articleView.html?idxno=217455",
+   "pub": "2026-11-16T17:58:00+09:00"
   },
   "7-5": {
    "cat": "AI",
-   "title": "[현장] AI는 질주하는데 행정은 제자리…기업들 \"불확실성 해소 서둘러...",
-   "desc": "피지컬·에이전트 AI 시대를 맞아 기술과 서비스의 변화 속도에 맞춰 행정 대응도 빨라져야 한다는 주장이... 서영훈 카카오 부사장은 16일 서울 글래드 여의도에서 열린 '2026 하반기 AI법정책포럼 공개 세미나-최근 AI...",
-   "url": "https://www.dailian.co.kr/news/view/1715739/?sc=Naver",
-   "naver": "https://n.news.naver.com/mnews/article/119/0003155817?sid=105",
-   "pub": "2026-11-16T17:38:00+09:00"
+   "title": "대구한의대, 160억 펀드로 경북 K-MEDI·AI 창업기업 육성 박차",
+   "desc": "대구한의대학교가 경북 지역의 한의학·바이오·헬스(K-MEDI)와 인공지능(AI) 분야... 이번 펀드는 K-MEDI를 비롯해 빅데이터, AI, 미래 모빌리티, 우주항공, 해양, 로봇...",
+   "url": "http://www.breaknews.com/1251335",
+   "naver": "http://www.breaknews.com/1251335",
+   "pub": "2026-11-16T17:58:00+09:00"
   },
   "7-6": {
    "cat": "AI",
-   "title": "울산시, 트램·조선 AI 등 14개 사업 국비 1029억 증액 총력",
-   "desc": "울산시의 주요 증액 건의 사업은 ▲극한환경 피지컬 인공지능(Heavy-Duty AI) 선도모델 실증사업 ▲조선 인공지능 전환(AX) 특화 인공지능 시범 실증 공간(AI모델하우스)구축 및 실증사업 ▲반구천 세계암각화센터 건립...",
-   "url": "http://www.ikld.kr/news/articleView.html?idxno=344230",
-   "naver": "http://www.ikld.kr/news/articleView.html?idxno=344230",
-   "pub": "2026-11-16T17:34:00+09:00"
+   "title": "한국표준협회-일본 SSDP, 디지털·AI 6대 협력 과제 발표",
+   "desc": "한국과 일본이 인공지능(AI) 모델 공동 개발과 제조데이터 활용, 피지컬 AI 실증 등 디지털 산업 분야에서 협력을 강화하기로 했다. 양국은 AI 기술 경쟁이 심화하는 가운데 산업 경쟁력을 높이고 데이터 보호와 기술 협력...",
+   "url": "https://www.enetnews.co.kr/news/articleView.html?idxno=56444",
+   "naver": "https://www.enetnews.co.kr/news/articleView.html?idxno=56444",
+   "pub": "2026-11-16T17:58:00+09:00"
   },
   "7-7": {
    "cat": "AI",
-   "title": "퀄컴, AI 기술 스마트폰 넘어 자동차·로봇으로 확⋯에이전틱 AI 전략 제...",
-   "desc": "퀄컴이 스마트폰과 PC를 넘어 자동차와 로봇, 스마트홈 등 다양한 기기에서 인공지능(AI)이 사용자의 의도를 파악하고 작업을 수행하는 '에이전틱 AI(Agentic AI)' 기술 확대에 나섰다. 스냅드래곤과 드래곤윙을...",
-   "url": "https://www.autodaily.co.kr/news/articleView.html?idxno=602136",
-   "naver": "https://www.autodaily.co.kr/news/articleView.html?idxno=602136",
-   "pub": "2026-11-16T17:30:00+09:00"
+   "title": "“AI드론 있으면 ‘부캉이’ 바다로 떠났는지 쉽게 알 수 있다”",
+   "desc": "인공지능(AI) 드론이 이를 확인하니 참치 떼라는 걸 금세 확인할 수 있다. 국제신문 ‘AI가 (ON) 동네’는 이러한 기술을 만드는 ㈜해양드론기술의 황의철 대표를 만났다. 해군 장교 출신인 그는 헬기 조종사를 하면서 무인기...",
+   "url": "http://www.kookje.co.kr/news2011/asp/newsbody.asp?code=0200&key=20261116.99099004681",
+   "naver": "https://n.news.naver.com/mnews/article/658/0000161391?sid=101",
+   "pub": "2026-11-16T17:56:00+09:00"
   },
   "7-8": {
    "cat": "AI",
-   "title": "티맵, 데이터·AI사업으로 영업이익 흑자 달성",
-   "desc": "이는 인공지능(AI)과 모빌리티 데이터를 앞세운 사업 전환의 성과가 영업 단계의 흑자로 입증된 것이라고... AI 에이전트 트래픽은 590만 명을 달성했으며 장소 탐색·추천 등 다양한 콘텐츠를 이용하는 이동 생활...",
-   "url": "https://www.g-enews.com/view.php?ud=2026111617114542163d7a510102_1",
-   "naver": "https://www.g-enews.com/view.php?ud=2026111617114542163d7a510102_1",
-   "pub": "2026-11-16T17:28:00+09:00"
+   "title": "피지컬 AI 다음 숙제는 현장 데이터와 표준화… \"지역 제조업을 실증 무...",
+   "desc": "데이터를 어떻게 쓸지는 손병희 마음AI 대표 겸 피지컬AI 표준화포럼 의장이 제조·물류 현장을 예로 설명했다. 손 대표는 정해진 동작만 반복하던 로봇이 데이터를 학습해 환경 변화에 스스로 대응하는 지능형 로봇으로...",
+   "url": "https://platum.kr/archives/298698",
+   "naver": "https://platum.kr/archives/298698",
+   "pub": "2026-11-16T17:54:00+09:00"
   },
   "7-9": {
    "cat": "AI",
-   "title": "새솔테크, '국방벤처 지원사업' 선정…AI 드론 보안 플랫폼 개발",
-   "desc": "새솔테크는 이번 과제에서 한국형 위험관리 프레임워크(K-RMF)와 연계한 AI(인공지능) 기반 드론 사이버보안 위협분석·위험평가 자동화 플랫폼을 개발한다. 개발 기간은 2026년 11월부터 20개월이다. 국방 무인체계의...",
-   "url": "https://www.mt.co.kr/industry/2026/11/16/2026111615155430812",
-   "naver": "https://n.news.naver.com/mnews/article/008/0005441886?sid=101",
-   "pub": "2026-11-16T17:28:00+09:00"
+   "title": "김희수 전북도의장 \"피지컬 AI, 국가 차원 육성\"…특별법 촉구",
+   "desc": "김 도의장은 이날 건의안을 통해 미래 산업 경쟁력을 좌우할 핵심기술로 떠오르는 피지컬 AI를 체계적으로 육성하기 위한 법적·제도적 기반을 촉구했다. 연구 개발부터 실증·사업화까지 산업 모든 주기에 걸친 국가...",
+   "url": "https://www.nocutnews.co.kr/news/6607699?utm_source=naver&utm_medium=article&utm_campaign=20261116174759",
+   "naver": "https://n.news.naver.com/mnews/article/079/0004210357?sid=102",
+   "pub": "2026-11-16T17:48:00+09:00"
   },
   "7-10": {
    "cat": "AI",
-   "title": "구미 국가1산단, 반세기 만의 '초격차 대혁신'… 굴뚝 공단서 AI·문화 융...",
-   "desc": "대한민국 산업화의 심장부인 경북 구미 국가제1산업단지(국가1산단)가 조성 반세기 만에 AI(인공지능)·로봇... 지난 2일 삼성전자 구미1공장 부지에서 착공한 '삼성 AI 데이터센터(60MW)'는 총 6조 원이 투입돼 2029년...",
-   "url": "https://www.thebk.co.kr/news/articleView.html?idxno=312854",
-   "naver": "https://www.thebk.co.kr/news/articleView.html?idxno=312854",
-   "pub": "2026-11-16T17:24:00+09:00"
+   "title": "[게시판] 멋쟁이사자처럼 베트남에 '피지컬 AI 데이터랩' 개소 등 단신",
+   "desc": "■ 멋쟁이사자처럼(대표 나성영)은 베트남 호치민에 피지컬 AI 현장 데이터 거점 '피지컬 AI 데이터랩'을 개소했다고 밝혔다. 약 131㎡ 규모에 주방·세탁·조립 등 7개 작업 셀을 갖췄다. 작업자가 비전 장치·촉각 장갑...",
+   "url": "https://www.aitimes.com/news/articleView.html?idxno=217456",
+   "naver": "https://www.aitimes.com/news/articleView.html?idxno=217456",
+   "pub": "2026-11-16T17:44:00+09:00"
   }
  }
 }
